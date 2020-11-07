@@ -1,0 +1,15 @@
+# SQL databases
+sql:
+  # Maximum amount of time a connection may be idle
+  connMaxIdleTime: 60s
+  # Maximum amount of time a connection may be reused
+  connMaxLifeTime: 60s
+  # Maximum number of connections in the idle connection pool
+  maxIdleConns: 10
+  # Maximum number of open connections to the database
+  maxOpenConns: 50
+
+# JSON Web Token, used for HTTP API authentication
+jwt:
+  # Signing algorithm
+  algorithm: HS256

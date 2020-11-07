@@ -1,0 +1,139 @@
+basePath: /api/v1
+definitions:
+  httpapi.HTTPError:
+    properties:
+      code:
+        description: HTTP status code.
+        example: 400
+        type: integer
+      message:
+        description: String describing the error that occurred.
+        example: Bad Request
+        type: string
+    type: object
+  models.CreateLocation:
+    properties:
+      address:
+        description: Full address of the location. Should contains at least street,
+          postal code and city.
+        example: 1 rue de la Poste, 75001 Paris
+        type: string
+        x-order: "2"
+      category_id:
+        description: Location category foreign key.
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+        x-order: "3"
+      name:
+        description: Short descriptive name of the location, like "Home" or "Work".
+        example: Home
+        type: string
+        x-order: "1"
+    required:
+    - address
+    - category_id
+    - name
+    type: object
+  models.Location:
+    properties:
+      address:
+        description: Full address of the location. Should contains at least street,
+          postal code and city.
+        example: 1 rue de la Poste, 75001 Paris
+        type: string
+        x-order: "3"
+      category_id:
+        description: Location category foreign key.
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+        x-order: "4"
+      id:
+        description: Location ID. Must be unique.
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+        x-order: "1"
+      name:
+        description: Short descriptive name of the location, like "Home" or "Work".
+        example: Home
+        type: string
+        x-order: "2"
+      user_id:
+        description: User ID. Owner of the location.
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+        x-order: "5"
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: emeric.debernis@gmail.com
+    name: Emeric de Bernis
+  description: |-
+    This REST API handles management of user locations. Locations can be saved in a local repository
+    or fetched from third-party sources such as Google Maps "My Places".
+  title: Locations Service REST API
+  version: "1.0"
+paths:
+  /locations:
+    get:
+      description: Get all user locations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Location'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpapi.HTTPError'
+      summary: Get locations
+      tags:
+      - locations
+    post:
+      consumes:
+      - application/json
+      description: Create new user locations.
+      parameters:
+      - description: New location
+        in: body
+        name: location
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateLocation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Location'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httpapi.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpapi.HTTPError'
+      summary: Create locations
+      tags:
+      - locations
+  /ping:
+    get:
+      description: Basic check of API health. Ensure that HTTP serving is working
+        correctly.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Ping API
+      tags:
+      - healthchecks
+schemes:
+- http
+swagger: "2.0"

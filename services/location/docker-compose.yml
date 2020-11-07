@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+      - "2112:2112"
+    depends_on:
+      - db
+    restart: unless-stopped
+    environment:
+      POSTGRESQL_HOST: db
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: password
+      POSTGRESQL_DB: location
+  db:
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: location
+  docs:
+    image: redocly/redoc
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      SPEC_URL: swagger/swagger.yaml
+    volumes:
+      - ./docs/:/usr/share/nginx/html/swagger/
