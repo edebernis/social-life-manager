@@ -1,0 +1,33 @@
+name: Build Location Service
+
+on:
+  push:
+    paths:
+      - 'services/location/**'
+  pull_request:
+    paths:
+      - 'services/location/**'
+
+jobs:
+
+  build:
+    name: Build Location service
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: Build
+      run: make build
+
+    - name: Test
+      run: make tests
+
+defaults:
+  run:
+    shell: bash
+    working-directory: services/location
