@@ -1,4 +1,4 @@
-name: Lint Location Service
+name: 'Location: Lint'
 
 on:
   push:
@@ -10,16 +10,15 @@ on:
 
 jobs:
   lint:
-    name: Lint Location service code
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Lint Code
+      - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.35

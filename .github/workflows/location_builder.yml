@@ -1,4 +1,4 @@
-name: Build Location Service
+name: 'Location: Build'
 
 on:
   push:
@@ -11,10 +11,10 @@ on:
 jobs:
 
   build:
-    name: Build Location service
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Set up Go
       uses: actions/setup-go@v2
