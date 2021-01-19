@@ -102,7 +102,7 @@ var doc = `{
         },
         "/ping": {
             "get": {
-                "description": "Basic check of API health. Ensure that HTTP serving is working correctly.",
+                "description": "Basic check of HTTP API health. Ensure that HTTP serving is working correctly.",
                 "produces": [
                     "application/json"
                 ],
