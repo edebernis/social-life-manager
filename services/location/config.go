@@ -11,9 +11,9 @@ import (
 type Config struct {
 	SQL struct {
 		ConnMaxIdleTime string `yaml:"connMaxIdleTime"`
-		ConnMaxLifetime string `yaml:"connMaxLifeTime"`
-		maxIdleConns    int    `yaml:"maxIdleConns"`
-		maxOpenConns    int    `yaml:"maxOpenConns"`
+		ConnMaxLifeTime string `yaml:"connMaxLifeTime"`
+		MaxIdleConns    int    `yaml:"maxIdleConns"`
+		MaxOpenConns    int    `yaml:"maxOpenConns"`
 	} `yaml:"sql"`
 	JWT struct {
 		Algorithm string

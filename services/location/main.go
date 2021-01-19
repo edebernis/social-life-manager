@@ -94,7 +94,7 @@ func newSQLConfig(config *Config) (*sqlrepo.Config, error) {
 		return nil, fmt.Errorf("Failed to parse SQL ConnMaxIdleTime config. %w", err)
 	}
 
-	ConnMaxLifetime, err := time.ParseDuration(config.SQL.ConnMaxLifetime)
+	connMaxLifeTime, err := time.ParseDuration(config.SQL.ConnMaxLifeTime)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse SQL ConnMaxLifetime config. %w", err)
 	}
@@ -107,9 +107,9 @@ func newSQLConfig(config *Config) (*sqlrepo.Config, error) {
 		Password:        os.Getenv("POSTGRESQL_PASSWORD"),
 		DBName:          os.Getenv("POSTGRESQL_DB"),
 		ConnMaxIdleTime: connMaxIdleTime,
-		ConnMaxLifetime: ConnMaxLifetime,
-		MaxIdleConns:    config.SQL.maxIdleConns,
-		MaxOpenConns:    config.SQL.maxOpenConns,
+		ConnMaxLifetime: connMaxLifeTime,
+		MaxIdleConns:    config.SQL.MaxIdleConns,
+		MaxOpenConns:    config.SQL.MaxOpenConns,
 	}, nil
 }
 
