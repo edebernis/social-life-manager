@@ -11,6 +11,9 @@ tests:
 docs:
 	swag init -g api/http/server.go
 
+lint:
+	golangci-lint run
+
 migrate.up:
 	migrate -database $(POSTGRESQL_URL) -path repositories/sql/migrations up
 
@@ -26,4 +29,4 @@ migrate-docker-compose.down:
 jwt-token:
 	jwt encode --alg HS256 --secret secret --sub $(shell uuidgen)
 
-.PHONY: build run tests docs db.migrate.up db.migrate.down
+.PHONY: build run tests docs lint db.migrate.up db.migrate.down
