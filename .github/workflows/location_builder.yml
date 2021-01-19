@@ -27,6 +27,19 @@ jobs:
     - name: Test
       run: make tests
 
+    - name: Install swag Go package
+      run: go get -u github.com/swaggo/swag/cmd/swag
+
+    - name: Build docs
+      run: make docs
+
+    - name: Commit docs changes
+      uses: EndBug/add-and-commit@v7
+      with:
+        cwd: './services/location'
+        add: 'docs'
+        message: 'Update location service docs'
+
 defaults:
   run:
     shell: bash
