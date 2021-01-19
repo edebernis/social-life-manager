@@ -63,15 +63,21 @@ func setupConfig() (*Config, error) {
 		return nil, fmt.Errorf("Failed to load .env file. %w", err)
 	}
 
+	// If config file path, got from command-line, does not exist
+	// try to get another config file path from env var
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		configPath = os.Getenv("CONFIG_FILE")
+	}
+
 	file, err := os.Open(configPath)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to open config file. %w", err)
+		return nil, fmt.Errorf("Failed to open config file %s. %w", configPath, err)
 	}
 	defer file.Close()
 
 	config, err := newConfig(file)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse config file. %w", err)
+		return nil, fmt.Errorf("Failed to parse config file %s. %w", configPath, err)
 	}
 
 	return config, nil
