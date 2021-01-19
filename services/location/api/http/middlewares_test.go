@@ -214,7 +214,7 @@ func TestAuthMiddlewareWithInvalidHeader(t *testing.T) {
 		t.FailNow()
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Invalid Header"))
+	req.Header.Set("Authorization", "Invalid Header")
 
 	server.router.ServeHTTP(resp, req)
 

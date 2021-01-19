@@ -64,5 +64,5 @@ type Config struct {
 
 // Abort current request and return consistent error to the user
 func abort(c *gin.Context, code int, errorMsg string) {
-	c.AbortWithError(code, errors.New(errorMsg))
+	_ = c.AbortWithError(code, errors.New(errorMsg))
 }

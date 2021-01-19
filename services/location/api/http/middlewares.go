@@ -88,7 +88,7 @@ func (mw *authenticationMiddleware) handlerFunc() gin.HandlerFunc {
 		token, err := mw.parseJWTToken(c, &userClaims{})
 		if err != nil {
 			logger.Errorf("authenticationMiddleware: invalid JWT token. %v", err)
-			c.AbortWithError(http.StatusUnauthorized, errors.New("Invalid authentication token"))
+			_ = c.AbortWithError(http.StatusUnauthorized, errors.New("Invalid authentication token"))
 			return
 		}
 
@@ -96,7 +96,7 @@ func (mw *authenticationMiddleware) handlerFunc() gin.HandlerFunc {
 
 		if err := mw.setContextDataFromClaims(c, claims); err != nil {
 			logger.Errorf("authenticationMiddleware: failed to set context data from JWT token. %v", err)
-			c.AbortWithError(http.StatusUnauthorized, errors.New("Invalid authentication token"))
+			_ = c.AbortWithError(http.StatusUnauthorized, errors.New("Invalid authentication token"))
 			return
 		}
 

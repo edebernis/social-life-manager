@@ -16,10 +16,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-const (
-	jwtSecretKey = "secretkey"
-)
-
 var (
 	mockContextMatcher = mock.MatchedBy(func(ctx context.Context) bool { return true })
 )
