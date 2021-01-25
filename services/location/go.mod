@@ -1,4 +1,4 @@
-module github.com/edebernis/social-life-manager/location
+module github.com/edebernis/social-life-manager/services/location
 
 go 1.15
 
