@@ -24,16 +24,12 @@ jobs:
         run: make test
       - name: Build app and containers
         run: make all-container
-      - name: Install swag Go package
-        run: go get -u github.com/swaggo/swag/cmd/swag
-      - name: Generate docs
-        run: make docs
       - name: Commit docs changes
         uses: EndBug/add-and-commit@v7
         with:
           cwd: './services/location'
-          add: 'docs'
-          message: 'Update location service docs'
+          add: 'api'
+          message: 'Update location service API docs'
 
   push:
     needs: build
@@ -53,7 +49,7 @@ jobs:
         env:
           CR_PAT: ${{ secrets.CR_PAT }}
         run: echo "$CR_PAT" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-      - name: Make container and push image
+      - name: Make container and push images
         shell: bash
         env:
           REGISTRY: ghcr.io/${GITHUB_REPOSITORY}

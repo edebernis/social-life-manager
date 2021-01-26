@@ -22,11 +22,16 @@ fi
 export CGO_ENABLED=0
 export GOARCH="${ARCH}"
 export GOOS="${OS}"
-export GO111MODULE=on
 export GOFLAGS="-mod=vendor"
 
 echo "Building app:"
 go install                      \
     -installsuffix "static"     \
     ./...
+echo "OK"
+
+echo "Building API docs:"
+swag init                           \
+    -g internal/api/http/server.go  \
+    -o ./api
 echo "OK"

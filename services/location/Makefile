@@ -36,9 +36,7 @@ all-build: $(addprefix build-, $(subst /,_, $(ALL_PLATFORMS)))
 all-container: $(addprefix container-, $(subst /,_, $(ALL_PLATFORMS)))
 
 build: $(OUTBIN)
-
 $(OUTBIN):
-	@echo "Making $(OUTBIN)"
 	@$(MAKE) run-build-script           \
 	    --no-print-directory            \
 	    SCRIPT=scripts/build.sh
@@ -73,23 +71,17 @@ run-build-script: build-image
 	    "
 
 container: $(OUTBIN)
-	@echo "Making container: $(IMAGE):$(TAG)"
 	@docker build --build-arg bin=$(OUTBIN) -t $(IMAGE):$(TAG) -t $(IMAGE):latest -f build/package/run.Dockerfile .
 
 push: container
-	@echo "Pushing images: $(IMAGE):$(TAG) $(IMAGE):latest"
 	@docker push $(IMAGE):$(TAG)
 	@docker push $(IMAGE):latest
 
-.PHONY: docs
-docs:
-	swag init -g internal/api/http/server.go
+clean:
+	@rm -rf bin .cache
 
 version:
 	@echo $(VERSION)
-
-clean:
-	@rm -rf bin .cache
 
 migrate.up:
 	migrate -database $(POSTGRESQL_URL) -path internal/repositories/sql/migrations up
