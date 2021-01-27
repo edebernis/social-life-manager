@@ -22,8 +22,8 @@ jobs:
         run: go mod vendor
       - name: Test
         run: make test
-      - name: Build app and containers
-        run: make all-container
+      - name: Build app and container
+        run: make container
       - name: Commit docs changes
         uses: EndBug/add-and-commit@v7
         with:
