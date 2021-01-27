@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   app:
-    build: ..
+    image: local/location
     ports:
       - "8080:8080"
       - "2112:2112"
@@ -9,9 +9,8 @@ services:
       - db
       - prometheus
     restart: unless-stopped
-    volumes:
-      - ./.env:/.env
-      - ./config.yml:/config.yml
+    env_file:
+     - ./.env
   db:
     image: postgres
     restart: unless-stopped
@@ -29,14 +28,14 @@ services:
     environment:
       SPEC_URL: swagger/swagger.yaml
     volumes:
-      - ./docs/:/usr/share/nginx/html/swagger/
+      - ../../api/:/usr/share/nginx/html/swagger/
   prometheus:
     image: prom/prometheus
     restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
   grafana:
     image: grafana/grafana
     restart: unless-stopped

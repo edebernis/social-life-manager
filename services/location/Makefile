@@ -1,6 +1,6 @@
 VERSION := $(shell git describe --tags --always --dirty)
 
-ALL_PLATFORMS := linux/amd64
+ALL_PLATFORMS := linux/amd64 darwin/amd64
 OS := $(if $(GOOS),$(GOOS),$(shell go env GOOS))
 ARCH := $(if $(GOARCH),$(GOARCH),$(shell go env GOARCH))
 
@@ -19,21 +19,19 @@ build-%:
 	    GOOS=$(firstword $(subst _, ,$*)) \
 	    GOARCH=$(lastword $(subst _, ,$*))
 
-container-%:
-	@$(MAKE) container                    \
+container:
+	@$(MAKE) .container                   \
 	    --no-print-directory              \
-	    GOOS=$(firstword $(subst _, ,$*)) \
-	    GOARCH=$(lastword $(subst _, ,$*))
+	    GOOS=linux                        \
+	    GOARCH=amd64
 
-push-%:
-	@$(MAKE) push                         \
+push:
+	@$(MAKE) .push                        \
 	    --no-print-directory              \
-	    GOOS=$(firstword $(subst _, ,$*)) \
-	    GOARCH=$(lastword $(subst _, ,$*))
+	    GOOS=linux                        \
+	    GOARCH=amd64
 
 all-build: $(addprefix build-, $(subst /,_, $(ALL_PLATFORMS)))
-
-all-container: $(addprefix container-, $(subst /,_, $(ALL_PLATFORMS)))
 
 build: $(OUTBIN)
 $(OUTBIN):
@@ -70,15 +68,20 @@ run-build-script: build-image
 	        $(SCRIPT)                                           \
 	    "
 
-container: $(OUTBIN)
-	@docker build --build-arg bin=$(OUTBIN) -t $(IMAGE):$(TAG) -t $(IMAGE):latest -f build/package/run.Dockerfile .
+.container: $(OUTBIN)
+	@docker build --build-arg bin=$(BIN) -t $(IMAGE):$(TAG) -t $(IMAGE):latest -f build/package/run.Dockerfile $(BUILD_DIR)
 
-push: container
+.push: .container
 	@docker push $(IMAGE):$(TAG)
 	@docker push $(IMAGE):latest
 
-clean:
-	@rm -rf bin .cache
+clean-bin:
+	@rm -rf bin
+
+clean-cache:
+	@rm -rf .cache
+
+clean: clean-bin clean-cache
 
 version:
 	@echo $(VERSION)
