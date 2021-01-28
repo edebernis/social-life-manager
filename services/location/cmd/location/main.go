@@ -1,18 +1,21 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/edebernis/social-life-manager/services/location/cmd/location/config"
+	"github.com/edebernis/social-life-manager/services/location/cmd/location/metrics"
 	"github.com/edebernis/social-life-manager/services/location/internal/api"
 	httpapi "github.com/edebernis/social-life-manager/services/location/internal/api/http"
 	sqlrepo "github.com/edebernis/social-life-manager/services/location/internal/repositories/sql"
 	"github.com/edebernis/social-life-manager/services/location/internal/usecases"
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,30 +32,6 @@ func setupLogging() {
 	} else {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
-}
-
-func setupInstrumenting() *prometheus.Registry {
-	registry := prometheus.NewRegistry()
-
-	handler := promhttp.InstrumentMetricHandler(
-		registry, promhttp.HandlerFor(registry, promhttp.HandlerOpts{
-			ErrorLog:      logger,
-			ErrorHandling: promhttp.HTTPErrorOnError,
-			Registry:      registry,
-		}),
-	)
-
-	http.Handle("/metrics", handler)
-
-	logger.Infof("Start HTTP metrics service listening on address %s", config.Config.MetricsBindAddr)
-	go func() {
-		err := http.ListenAndServe(config.Config.MetricsBindAddr, nil)
-		if err != nil {
-			logger.Fatalf("Failed to start HTTP metrics server : %v", err)
-		}
-	}()
-
-	return registry
 }
 
 func setupSQLRepository() (*sqlrepo.SQLRepository, error) {
@@ -92,33 +71,57 @@ func setupHTTPAPI(repo *sqlrepo.SQLRepository, registry *prometheus.Registry) *h
 	return server
 }
 
-func setup() (*sqlrepo.SQLRepository, *httpapi.HTTPServer, error) {
+func setup() (*sqlrepo.SQLRepository, *httpapi.HTTPServer, *metrics.Server, error) {
 	if err := config.LoadConfig(); err != nil {
-		return nil, nil, fmt.Errorf("Failed to load configuration. %w", err)
+		return nil, nil, nil, fmt.Errorf("Failed to load configuration. %w", err)
 	}
 
 	setupLogging()
-	registry := setupInstrumenting()
 
 	repo, err := setupSQLRepository()
 	if err != nil {
-		return nil, nil, fmt.Errorf("Failed to setup SQL repository. %w", err)
+		return nil, nil, nil, fmt.Errorf("Failed to setup SQL repository. %w", err)
 	}
 
-	server := setupHTTPAPI(repo, registry)
+	metricsServer := metrics.NewMetricsServer(config.Config.Metrics.Path)
+	httpServer := setupHTTPAPI(repo, metricsServer.Registry)
 
-	return repo, server, nil
+	return repo, httpServer, metricsServer, nil
 }
 
 func main() {
-	repo, server, err := setup()
+	repo, httpServer, metricsServer, err := setup()
 	if err != nil {
 		logger.Fatalf("Failed to setup application. %v", err)
 	}
-	defer repo.Close()
 
-	logger.Infof("Start HTTP API listening on address %s", config.Config.HTTPBindAddr)
-	if err := server.Serve(config.Config.HTTPBindAddr); err != nil {
-		logger.Fatalf("Failed to start HTTP API server : %v", err)
+	logger.Infof("Start HTTP Metrics server listening on address %s", config.Config.Metrics.BindAddr)
+	go func() {
+		if err := metricsServer.Serve(config.Config.Metrics.BindAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Fatalf("Failed to start HTTP Metrics server : %v", err)
+		}
+	}()
+
+	logger.Infof("Start HTTP API server listening on address %s", config.Config.API.HTTPBindAddr)
+	go func() {
+		if httpServer.Serve(config.Config.API.HTTPBindAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Fatalf("Failed to start HTTP API server : %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	<-quit
+	logger.Info("Shutting down")
+
+	if err := metricsServer.Shutdown(); err != nil {
+		logger.Errorf("Failed to shutdown gracefully metrics server. %s", err)
+	}
+	if err := httpServer.Shutdown(); err != nil {
+		logger.Errorf("Failed to shutdown gracefully API HTTP server. %s", err)
+	}
+	if err := repo.Close(); err != nil {
+		logger.Errorf("Failed to close repository. %s", err)
 	}
 }

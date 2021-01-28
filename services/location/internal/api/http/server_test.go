@@ -33,6 +33,7 @@ func newHandlerTestContext(t *testing.T, method, url string, payload *gin.H) (*g
 		nil,
 		api,
 		r,
+		nil,
 	}
 
 	var body bytes.Buffer

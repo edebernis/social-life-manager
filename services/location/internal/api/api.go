@@ -26,4 +26,5 @@ func NewAPI(locationUsecase ILocationUsecase) *API {
 // Server describes a service to listen and serve requests
 type Server interface {
 	Serve(addr string) error
+	Shutdown() error
 }

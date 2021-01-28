@@ -12,10 +12,15 @@ import (
 var Config appConfig
 
 type appConfig struct {
-	Debug           bool
-	HTTPBindAddr    string
-	MetricsBindAddr string
+	Debug bool
 
+	API struct {
+		HTTPBindAddr string
+	}
+	Metrics struct {
+		BindAddr string
+		Path     string
+	}
 	SQL struct {
 		Host            string
 		Port            int
@@ -55,8 +60,11 @@ func LoadConfig() error {
 
 func setDefaults(v *viper.Viper) {
 	v.SetDefault("debug", false)
-	v.SetDefault("httpBindAddr", ":8080")
-	v.SetDefault("metricsBindAddr", ":2112")
+
+	v.SetDefault("api.httpBindAddr", ":8080")
+
+	v.SetDefault("metrics.bindAddr", ":2112")
+	v.SetDefault("metrics.path", "/metrics")
 
 	v.SetDefault("sql.host", "localhost")
 	v.SetDefault("sql.port", 5432)

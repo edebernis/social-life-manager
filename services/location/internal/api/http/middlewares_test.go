@@ -40,6 +40,7 @@ func TestLoggerMiddlewareWithOKRequest(t *testing.T) {
 		nil,
 		nil,
 		gin.New(),
+		nil,
 	}
 
 	server.router.Use(loggerMiddleware())
@@ -66,6 +67,7 @@ func TestLoggerMiddlewareWithErrorRequest(t *testing.T) {
 		nil,
 		nil,
 		gin.New(),
+		nil,
 	}
 
 	server.router.Use(loggerMiddleware())
@@ -92,6 +94,7 @@ func TestErrorMiddlewareWithOKRequest(t *testing.T) {
 		nil,
 		nil,
 		gin.New(),
+		nil,
 	}
 
 	server.router.Use(errorMiddleware())
@@ -118,6 +121,7 @@ func TestErrorMiddlewareWithErrorRequest(t *testing.T) {
 		nil,
 		nil,
 		gin.New(),
+		nil,
 	}
 
 	server.router.Use(errorMiddleware())
@@ -153,6 +157,7 @@ func TestRecoveryMiddlewareWithPanicRequest(t *testing.T) {
 		nil,
 		nil,
 		gin.New(),
+		nil,
 	}
 
 	server.router.Use(recoveryMiddleware())
@@ -182,6 +187,7 @@ func newTestAuthMiddleware() *HTTPServer {
 		nil,
 		nil,
 		gin.New(),
+		nil,
 	}
 
 	mw := newAuthMiddleware(server.Config.JWTAlgorithm, server.Config.JWTSecretKey)
@@ -415,6 +421,7 @@ func TestMetricsMiddlewareRequestsCount(t *testing.T) {
 		prometheus.NewRegistry(),
 		nil,
 		gin.New(),
+		nil,
 	}
 
 	mw := newMetricsMiddleware(server.PrometheusRegistry)

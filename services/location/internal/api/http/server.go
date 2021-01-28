@@ -1,7 +1,11 @@
 package httpapi
 
 import (
+	"context"
 	"errors"
+	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/edebernis/social-life-manager/services/location/internal/api"
 	"github.com/gin-gonic/gin"
@@ -35,23 +39,41 @@ type HTTPServer struct {
 
 	api    *api.API
 	router *gin.Engine
+	server *http.Server
 }
 
-// Serve runs the server. This method blocks the current goroutine
+// Serve runs the server. This method blocks the current goroutine.
 func (s *HTTPServer) Serve(addr string) error {
-	return s.router.Run(addr)
+	s.server.Addr = addr
+	return s.server.ListenAndServe()
+}
+
+// Shutdown stops the server gracefully
+func (s *HTTPServer) Shutdown() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := s.server.Shutdown(ctx); err != nil {
+		return fmt.Errorf("Server forced to shutdown: %w", err)
+	}
+
+	return nil
 }
 
 // NewHTTPServer creates a new HTTP server for the API
 func NewHTTPServer(api *api.API, registry prometheus.Registerer, config *Config) *HTTPServer {
 	gin.SetMode(gin.ReleaseMode)
+	router := gin.New()
 
 	s := &HTTPServer{
 		config,
 		"/api",
 		registry,
 		api,
-		gin.New(),
+		router,
+		&http.Server{
+			Handler: router,
+		},
 	}
 	s.routes()
 
