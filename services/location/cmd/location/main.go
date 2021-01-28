@@ -104,7 +104,7 @@ func main() {
 
 	logger.Infof("Start HTTP API server listening on address %s", config.Config.API.HTTPBindAddr)
 	go func() {
-		if httpServer.Serve(config.Config.API.HTTPBindAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := httpServer.Serve(config.Config.API.HTTPBindAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Fatalf("Failed to start HTTP API server : %v", err)
 		}
 	}()
