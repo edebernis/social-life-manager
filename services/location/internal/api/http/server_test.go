@@ -21,7 +21,7 @@ var (
 	mockContextMatcher = mock.MatchedBy(func(ctx context.Context) bool { return true })
 )
 
-func newHandlerTestContext(t *testing.T, method, url string, payload *gin.H) (*gin.Context, *httptest.ResponseRecorder, *HTTPServer) {
+func newHandlerTestContext(t *testing.T, method, url string, payload *gin.H, params *[]gin.Param) (*gin.Context, *httptest.ResponseRecorder, *HTTPServer) {
 	gin.SetMode(gin.TestMode)
 	resp := httptest.NewRecorder()
 	ctx, r := gin.CreateTestContext(resp)
@@ -46,9 +46,13 @@ func newHandlerTestContext(t *testing.T, method, url string, payload *gin.H) (*g
 	if err != nil {
 		t.FailNow()
 	}
+	// URL parameters need to be set manually
+	if params != nil {
+		ctx.Params = *params
+	}
 
 	user := models.NewUser(models.NewID(), "testuser@no-reply.com")
-	ctx.Set("user", user)
+	ctx.Request = ctx.Request.WithContext(models.NewContextWithUser(ctx.Request.Context(), user))
 
 	return ctx, resp, server
 }

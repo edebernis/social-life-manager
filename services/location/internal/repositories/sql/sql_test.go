@@ -1,15 +1,20 @@
 package sqlrepository
 
 import (
+	"context"
 	"errors"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/edebernis/social-life-manager/services/location/internal/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func newSQLMock(t *testing.T) (*SQLRepository, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
+	db, mock, err := sqlmock.New(
+		sqlmock.MonitorPingsOption(true),
+		sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual),
+	)
 	if err != nil {
 		t.FailNow()
 	}
@@ -19,6 +24,11 @@ func newSQLMock(t *testing.T) (*SQLRepository, sqlmock.Sqlmock) {
 	}
 
 	return repo, mock
+}
+
+func newTestContext() context.Context {
+	user := models.NewUser(models.NewID(), "user@test.fr")
+	return models.NewContextWithUser(context.Background(), user)
 }
 
 func TestPostgresConnectionStringWithoutSSL(t *testing.T) {

@@ -370,17 +370,13 @@ func TestAuthMiddlewareWithValidToken(t *testing.T) {
 	userEmail := "test@no-reply.com"
 
 	server.router.GET("/testAuthMiddleware", func(c *gin.Context) {
+		user, ok := models.NewUserFromContext(c.Request.Context())
+
+		assert.True(t, ok)
+		assert.Equal(t, user.ID, userID)
+		assert.Equal(t, user.Email, userEmail)
+
 		c.JSON(http.StatusOK, nil)
-
-		user, exists := c.Get("user")
-
-		assert.True(t, exists)
-		assert.IsType(t, &models.User{}, user)
-
-		userObj := user.(*models.User)
-
-		assert.Equal(t, userObj.ID, userID)
-		assert.Equal(t, userObj.Email, userEmail)
 	})
 
 	req, err := http.NewRequest("GET", "/testAuthMiddleware", nil)

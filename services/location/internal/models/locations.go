@@ -24,7 +24,43 @@ type CreateLocation struct {
 	// Full address of the location. Should contains at least street, postal code and city.
 	Address string `json:"address" example:"1 rue de la Poste, 75001 Paris" binding:"required" extensions:"x-order=2"`
 	// Location category foreign key.
-	CategoryID string `json:"category_id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required" extensions:"x-order=3"`
+	Category ID `json:"category_id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required" extensions:"x-order=3"`
+}
+
+// GetLocations validates user input to get locations
+type GetLocations struct {
+	// Location category foreign key.
+	Category string `form:"category_id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"omitempty,uuid" extensions:"x-order=1"`
+}
+
+// GetLocationByID validates user input to get a specific location using its id
+// TODO: replace string by ID type and let the binding engine do the parsing work.
+// Open issue: https://github.com/gin-gonic/gin/issues/2631
+type GetLocationByID struct {
+	// ID of the location.
+	ID string `uri:"id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required,uuid" extensions:"x-order=1"`
+}
+
+// UpdateLocationQuery validates query user input to update an existing location
+type UpdateLocationQuery struct {
+	// ID of the location.
+	ID string `uri:"id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required,uuid" extensions:"x-order=1"`
+}
+
+// UpdateLocationBody validates body user input to update an existing location
+type UpdateLocationBody struct {
+	// Short descriptive name of the location, like "Home" or "Work".
+	Name string `json:"name" example:"Home" binding:"required_without_all" extensions:"x-order=1"`
+	// Full address of the location. Should contains at least street, postal code and city.
+	Address string `json:"address" example:"1 rue de la Poste, 75001 Paris" binding:"required_without_all" extensions:"x-order=2"`
+	// Location category foreign key.
+	Category ID `json:"category_id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required_without_all" extensions:"x-order=3"`
+}
+
+// DeleteLocation validates user input to delete an existing location
+type DeleteLocation struct {
+	// ID of the location.
+	ID string `uri:"id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required,uuid" extensions:"x-order=1"`
 }
 
 // NewLocation creates a new user location
@@ -46,10 +82,37 @@ type Category struct {
 	Name string `json:"name" example:"Homes" extensions:"x-order=2"`
 }
 
+// Categories is an array of categories
+type Categories []*Category
+
 // CreateCategory validates user input to create a new category
 type CreateCategory struct {
 	// Short descriptive name of the category. Like "Homes" or "Tennis Center".
 	Name string `json:"name" example:"Homes" binding:"required" extensions:"x-order=1"`
+}
+
+// GetCategoryByID validates user input to get a specific category using its id
+type GetCategoryByID struct {
+	// ID of the category.
+	ID string `uri:"id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required,uuid" extensions:"x-order=1"`
+}
+
+// UpdateCategoryQuery validates query user input to update an existing category
+type UpdateCategoryQuery struct {
+	// ID of the category.
+	ID string `uri:"id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required,uuid" extensions:"x-order=1"`
+}
+
+// UpdateCategoryBody validates body user input to update an existing category
+type UpdateCategoryBody struct {
+	// Short descriptive name of the category, like "Homes" or "Sport".
+	Name string `json:"name" example:"Homes" binding:"required_without_all" extensions:"x-order=1"`
+}
+
+// DeleteCategory validates user input to delete an existing category
+type DeleteCategory struct {
+	// ID of the category.
+	ID string `uri:"id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required,uuid" extensions:"x-order=1"`
 }
 
 // NewCategory creates a new location category

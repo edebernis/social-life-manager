@@ -111,9 +111,12 @@ func (mw *authenticationMiddleware) setContextDataFromClaims(c *gin.Context, cla
 	if err != nil {
 		return fmt.Errorf("Invalid user ID in JWT token subject : %s. %w", claims.StandardClaims.Subject, err)
 	}
+	if userID == models.NilID {
+		return errors.New("User ID cannot be nil")
+	}
 
 	user := models.NewUser(userID, claims.Email)
-	c.Set("user", user)
+	c.Request = c.Request.WithContext(models.NewContextWithUser(c.Request.Context(), user))
 
 	return nil
 }

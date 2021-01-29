@@ -12,9 +12,52 @@ type LocationRepositoryMock struct {
 	mock.Mock
 }
 
-// Open opens repository
-func (r *LocationRepositoryMock) Open() error {
-	args := r.Called()
+// CreateCategory creates a new category in repository
+func (r *LocationRepositoryMock) CreateCategory(ctx context.Context, cat *models.Category) error {
+	args := r.Called(ctx, cat)
+	return args.Error(0)
+}
+
+// GetCategories fetches all categories in repository
+func (r *LocationRepositoryMock) GetCategories(ctx context.Context) (*models.Categories, error) {
+	args := r.Called(ctx)
+
+	cats := args.Get(0)
+	if cats == nil {
+		return nil, args.Error(1)
+	}
+	return cats.(*models.Categories), args.Error(1)
+}
+
+// FindCategoryByID returns category matching specified ID or nil
+func (r *LocationRepositoryMock) FindCategoryByID(ctx context.Context, id models.ID) (*models.Category, error) {
+	args := r.Called(ctx, id)
+	cat := args.Get(0)
+	if cat == nil {
+		return nil, args.Error(1)
+	}
+	return cat.(*models.Category), args.Error(1)
+}
+
+// FindCategoryByName returns category matching specified name or nil
+func (r *LocationRepositoryMock) FindCategoryByName(ctx context.Context, name string) (*models.Category, error) {
+	args := r.Called(ctx, name)
+	cat := args.Get(0)
+	if cat == nil {
+		return nil, args.Error(1)
+	}
+	return cat.(*models.Category), args.Error(1)
+}
+
+// UpdateCategory updates category in repository
+func (r *LocationRepositoryMock) UpdateCategory(ctx context.Context, cat *models.Category) error {
+	args := r.Called(ctx, cat)
+	return args.Error(0)
+}
+
+// DeleteCategory deletes category in repository
+func (r *LocationRepositoryMock) DeleteCategory(ctx context.Context, id models.ID) error {
+	args := r.Called(ctx, id)
 	return args.Error(0)
 }
 
@@ -74,11 +117,5 @@ func (r *LocationRepositoryMock) UpdateLocation(ctx context.Context, loc *models
 // DeleteLocation deletes location in repository
 func (r *LocationRepositoryMock) DeleteLocation(ctx context.Context, id models.ID) error {
 	args := r.Called(ctx, id)
-	return args.Error(0)
-}
-
-// Close closes repository
-func (r *LocationRepositoryMock) Close() error {
-	args := r.Called()
 	return args.Error(0)
 }
