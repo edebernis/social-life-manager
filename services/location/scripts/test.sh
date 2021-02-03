@@ -8,7 +8,7 @@ export CGO_ENABLED=1
 export GOFLAGS="-mod=vendor"
 
 # Collect test targets
-SRC_DIRS="cmd internal"
+SRC_DIRS="cmd pkg internal"
 TARGETS=$(for d in ${SRC_DIRS}; do echo ./$d/...; done)
 
 # Run tests
