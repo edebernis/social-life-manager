@@ -27,6 +27,224 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/categories": {
+            "get": {
+                "description": "Get all categories.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get categories",
+                "responses": {
+                    "200": {
+                        "description": "The returned categories",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Category"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create new categories.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Create categories",
+                "parameters": [
+                    {
+                        "description": "New category",
+                        "name": "category",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateCategory"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The created category",
+                        "schema": {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "description": "Get one specific category using provided ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get category with specified ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The returned category",
+                        "schema": {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update specified category using provided values.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Update category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Category name",
+                        "name": "name",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The updated category",
+                        "schema": {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete one specific category using provided ID.",
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Delete category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/locations": {
             "get": {
                 "description": "Get all user locations.",
@@ -37,14 +255,34 @@ var doc = `{
                     "locations"
                 ],
                 "summary": "Get locations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "category_id",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "The returned locations",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/models.Location"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
                         }
                     },
                     "500": {
@@ -80,13 +318,174 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "The created location",
                         "schema": {
                             "$ref": "#/definitions/models.Location"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/locations/{id}": {
+            "get": {
+                "description": "Get one specific location using provided ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "locations"
+                ],
+                "summary": "Get location with specified ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The returned location",
+                        "schema": {
+                            "$ref": "#/definitions/models.Location"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update specified location using provided values.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "locations"
+                ],
+                "summary": "Update location",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Location name",
+                        "name": "name",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Location address",
+                        "name": "address",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Location category",
+                        "name": "category_id",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The updated location",
+                        "schema": {
+                            "$ref": "#/definitions/models.Location"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete one specific location using provided ID.",
+                "tags": [
+                    "locations"
+                ],
+                "summary": "Delete location",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httpapi.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/httpapi.HTTPError"
                         }
@@ -102,7 +501,7 @@ var doc = `{
         },
         "/ping": {
             "get": {
-                "description": "Basic check of HTTP API health. Ensure that HTTP serving is working correctly.",
+                "description": "Basic check of HTTP API health. Ensure that HTTP service is working correctly.",
                 "produces": [
                     "application/json"
                 ],
@@ -131,6 +530,37 @@ var doc = `{
                     "description": "String describing the error that occurred.",
                     "type": "string",
                     "example": "Bad Request"
+                }
+            }
+        },
+        "models.Category": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Category ID. Must be unique.",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "name": {
+                    "description": "Short descriptive name of the category. Like \"Homes\" or \"Tennis Center\".",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "Homes"
+                }
+            }
+        },
+        "models.CreateCategory": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "description": "Short descriptive name of the category. Like \"Homes\" or \"Tennis Center\".",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "Homes"
                 }
             }
         },
