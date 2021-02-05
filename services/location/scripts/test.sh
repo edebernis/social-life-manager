@@ -44,7 +44,7 @@ echo
 
 # Run golangci-lint. If problems are found - print them.
 echo "Checking golangci-lint:"
-ERRS=$(golangci-lint run ${TARGETS} 2>&1 || true)
+ERRS=$(golangci-lint run --timeout 5m ${TARGETS} 2>&1 || true)
 if [ -n "${ERRS}" ]; then
     echo "FAIL"
     echo "${ERRS}"
