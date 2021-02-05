@@ -29,7 +29,7 @@ jobs:
         with:
           cwd: './services/location'
           add: 'api'
-          message: 'Update location service API docs'
+          message: 'location: update HTTP API docs'
           author_name: Emeric de Bernis
           author_email: emeric.debernis@gmail.com
 
