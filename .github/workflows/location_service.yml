@@ -30,6 +30,8 @@ jobs:
           cwd: './services/location'
           add: 'api'
           message: 'Update location service API docs'
+          author_name: Emeric de Bernis
+          author_email: emeric.debernis@gmail.com
 
   push:
     needs: build
