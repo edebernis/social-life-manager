@@ -87,7 +87,7 @@ func TestPingRepositoryWithError(t *testing.T) {
 
 	mock.ExpectPing().WillReturnError(errors.New("failed"))
 
-	err := repo.Ping()
+	err := repo.Ping(context.Background())
 
 	assert.Error(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
@@ -99,7 +99,7 @@ func TestPingRepositoryWithSuccess(t *testing.T) {
 
 	mock.ExpectPing()
 
-	err := repo.Ping()
+	err := repo.Ping(context.Background())
 
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())

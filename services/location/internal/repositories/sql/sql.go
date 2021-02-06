@@ -1,6 +1,7 @@
 package sqlrepository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -62,8 +63,11 @@ func (r *SQLRepository) Open() error {
 }
 
 // Ping tests that DB is reachable over the network
-func (r *SQLRepository) Ping() error {
-	if err := r.db.Ping(); err != nil {
+func (r *SQLRepository) Ping(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	defer cancel()
+
+	if err := r.db.PingContext(ctx); err != nil {
 		return fmt.Errorf("Failed to ping repository. %w", err)
 	}
 

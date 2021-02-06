@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -52,7 +53,7 @@ func setupSQLRepository() (*sqlrepo.SQLRepository, error) {
 		return nil, fmt.Errorf("Failed to open SQL repository. %w", err)
 	}
 
-	if err := repo.Ping(); err != nil {
+	if err := repo.Ping(context.Background()); err != nil {
 		return nil, fmt.Errorf("Failed to ping SQL repository. %w", err)
 	}
 
