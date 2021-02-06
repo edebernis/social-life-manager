@@ -69,7 +69,7 @@ func (r *SQLRepository) FindCategoryByID(ctx context.Context, id models.ID) (*mo
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, name FROM categories WHERE id = ?"
+	query := "SELECT id, name FROM categories WHERE id = $1"
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("FindCategoryByID: failed to prepare context for query %s. %w", query, err)
@@ -93,7 +93,7 @@ func (r *SQLRepository) FindCategoryByName(ctx context.Context, name string) (*m
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, name FROM categories WHERE name = ?"
+	query := "SELECT id, name FROM categories WHERE name = $1"
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("FindCategoryByName: failed to prepare context for query %s. %w", query, err)
@@ -137,7 +137,7 @@ func (r *SQLRepository) DeleteCategory(ctx context.Context, id models.ID) error 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "DELETE FROM categories WHERE id = ?"
+	query := "DELETE FROM categories WHERE id = $1"
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return fmt.Errorf("DeleteCategory: failed to prepare context for query %s. %w", query, err)
@@ -177,7 +177,7 @@ func (r *SQLRepository) GetLocations(ctx context.Context) (*models.Locations, er
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = ?"
+	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = $1"
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("GetLocations: failed to prepare context for query %s. %w", query, err)

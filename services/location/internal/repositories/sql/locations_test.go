@@ -126,7 +126,7 @@ func TestFindCategoryByIDWithPrepareError(t *testing.T) {
 
 	id := models.NewID()
 
-	query := "SELECT id, name FROM categories WHERE id = ?"
+	query := "SELECT id, name FROM categories WHERE id = $1"
 	mock.ExpectPrepare(query).WillReturnError(errors.New("failed"))
 
 	_, err := repo.FindCategoryByID(newTestContext(), id)
@@ -140,7 +140,7 @@ func TestFindCategoryByIDWithQueryError(t *testing.T) {
 
 	id := models.NewID()
 
-	query := "SELECT id, name FROM categories WHERE id = ?"
+	query := "SELECT id, name FROM categories WHERE id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WithArgs(id).WillReturnError(errors.New("failed"))
 
@@ -159,7 +159,7 @@ func TestFindCategoryByIDWithRowError(t *testing.T) {
 		RowError(0, errors.New("failed")).
 		AddRow(cat.ID, cat.Name)
 
-	query := "SELECT id, name FROM categories WHERE id = ?"
+	query := "SELECT id, name FROM categories WHERE id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WithArgs(cat.ID).WillReturnRows(rows)
 
@@ -174,7 +174,7 @@ func TestFindCategoryByIDWithNoResult(t *testing.T) {
 
 	id := models.NewID()
 
-	query := "SELECT id, name FROM categories WHERE id = ?"
+	query := "SELECT id, name FROM categories WHERE id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WithArgs(id).WillReturnRows(sqlmock.NewRows(nil))
 
@@ -193,7 +193,7 @@ func TestFindCategoryByIDWithSuccess(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"id", "name"}).
 		AddRow(cat.ID, cat.Name)
 
-	query := "SELECT id, name FROM categories WHERE id = ?"
+	query := "SELECT id, name FROM categories WHERE id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WithArgs(cat.ID).WillReturnRows(rows)
 
@@ -207,7 +207,7 @@ func TestFindCategoryByNameWithPrepareError(t *testing.T) {
 	repo, mock := newSQLMock(t)
 	defer repo.Close()
 
-	query := "SELECT id, name FROM categories WHERE name = ?"
+	query := "SELECT id, name FROM categories WHERE name = $1"
 	mock.ExpectPrepare(query).WillReturnError(errors.New("failed"))
 
 	_, err := repo.FindCategoryByName(newTestContext(), "Test Category")
@@ -221,7 +221,7 @@ func TestFindCategoryByNameWithQueryError(t *testing.T) {
 
 	name := "Test Category"
 
-	query := "SELECT id, name FROM categories WHERE name = ?"
+	query := "SELECT id, name FROM categories WHERE name = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WithArgs(name).WillReturnError(errors.New("failed"))
 
@@ -240,7 +240,7 @@ func TestFindCategoryByNameWithRowError(t *testing.T) {
 		RowError(0, errors.New("failed")).
 		AddRow(cat.ID, cat.Name)
 
-	query := "SELECT id, name FROM categories WHERE name = ?"
+	query := "SELECT id, name FROM categories WHERE name = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WithArgs(cat.Name).WillReturnRows(rows)
 
@@ -255,7 +255,7 @@ func TestFindCategoryByNameWithNoResult(t *testing.T) {
 
 	name := "Test Category"
 
-	query := "SELECT id, name FROM categories WHERE name = ?"
+	query := "SELECT id, name FROM categories WHERE name = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WithArgs(name).WillReturnRows(sqlmock.NewRows(nil))
 
@@ -274,7 +274,7 @@ func TestFindCategoryByNameWithSuccess(t *testing.T) {
 	rows := sqlmock.NewRows([]string{"id", "name"}).
 		AddRow(cat.ID, cat.Name)
 
-	query := "SELECT id, name FROM categories WHERE name = ?"
+	query := "SELECT id, name FROM categories WHERE name = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WithArgs(cat.Name).WillReturnRows(rows)
 
@@ -336,7 +336,7 @@ func TestDeleteCategoryWithPrepareError(t *testing.T) {
 
 	id := models.NewID()
 
-	query := "DELETE FROM categories WHERE id = ?"
+	query := "DELETE FROM categories WHERE id = $1"
 	mock.ExpectPrepare(query).WillReturnError(errors.New("failed"))
 
 	err := repo.DeleteCategory(newTestContext(), id)
@@ -350,7 +350,7 @@ func TestDeleteCategoryWithExecError(t *testing.T) {
 
 	id := models.NewID()
 
-	query := "DELETE FROM categories WHERE id = ?"
+	query := "DELETE FROM categories WHERE id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectExec().WithArgs(id).WillReturnError(errors.New("failed"))
 
@@ -365,7 +365,7 @@ func TestDeleteCategoryWithSuccess(t *testing.T) {
 
 	id := models.NewID()
 
-	query := "DELETE FROM categories WHERE id = ?"
+	query := "DELETE FROM categories WHERE id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectExec().
 		WithArgs(id).
@@ -426,7 +426,7 @@ func TestGetLocationsWithPrepareError(t *testing.T) {
 	repo, mock := newSQLMock(t)
 	defer repo.Close()
 
-	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = ?"
+	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = $1"
 	mock.ExpectPrepare(query).WillReturnError(errors.New("failed"))
 
 	_, err := repo.GetLocations(newTestContext())
@@ -438,7 +438,7 @@ func TestGetLocationsWithQueryError(t *testing.T) {
 	repo, mock := newSQLMock(t)
 	defer repo.Close()
 
-	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = ?"
+	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WillReturnError(errors.New("failed"))
 
@@ -460,7 +460,7 @@ func TestGetLocationsWithRowError(t *testing.T) {
 		RowError(0, errors.New("failed")).
 		AddRow(loc.ID, loc.Name, loc.Address, loc.Category, loc.User)
 
-	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = ?"
+	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WillReturnRows(rows)
 
@@ -483,7 +483,7 @@ func TestGetLocationsWithSuccess(t *testing.T) {
 		AddRow(loc1.ID, loc1.Name, loc1.Address, loc1.Category, loc1.User).
 		AddRow(loc2.ID, loc2.Name, loc2.Address, loc2.Category, loc2.User)
 
-	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = ?"
+	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = $1"
 	prep := mock.ExpectPrepare(query)
 	prep.ExpectQuery().WillReturnRows(rows)
 
