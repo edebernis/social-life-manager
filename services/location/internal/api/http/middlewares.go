@@ -52,7 +52,6 @@ func errorMiddleware() gin.HandlerFunc {
 
 		if err := c.Errors.Last(); err != nil {
 			newError(c, c.Writer.Status(), err)
-			return
 		}
 	}
 }

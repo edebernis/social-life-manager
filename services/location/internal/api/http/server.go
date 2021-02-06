@@ -2,7 +2,6 @@ package httpapi
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -90,5 +89,5 @@ type Config struct {
 
 // Abort current request and return consistent error to the user
 func abort(c *gin.Context, code int, errorMsg string) {
-	_ = c.AbortWithError(code, errors.New(errorMsg))
+	c.AbortWithStatusJSON(code, HTTPError{code, errorMsg})
 }
