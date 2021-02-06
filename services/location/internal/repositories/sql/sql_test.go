@@ -21,6 +21,7 @@ func newSQLMock(t *testing.T) (*SQLRepository, sqlmock.Sqlmock) {
 	repo := &SQLRepository{
 		&Config{},
 		db,
+		nil,
 	}
 
 	return repo, mock
@@ -40,7 +41,7 @@ func TestPostgresConnectionStringWithoutSSL(t *testing.T) {
 		Password: "test",
 		DBName:   "test",
 		SSL:      false,
-	})
+	}, nil)
 
 	connectionStr, err := repo.getConnectionString()
 
@@ -57,7 +58,7 @@ func TestPostgresConnectionStringWithSSL(t *testing.T) {
 		Password: "test",
 		DBName:   "test",
 		SSL:      true,
-	})
+	}, nil)
 
 	connectionStr, err := repo.getConnectionString()
 
@@ -74,7 +75,7 @@ func TestUnknownDriverConnectionString(t *testing.T) {
 		Password: "test",
 		DBName:   "test",
 		SSL:      false,
-	})
+	}, nil)
 
 	_, err := repo.getConnectionString()
 

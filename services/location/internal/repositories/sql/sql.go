@@ -5,6 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/dlmiddlecote/sqlstats"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
@@ -14,15 +17,17 @@ const (
 
 // SQLRepository represents a repository using SQL to query
 type SQLRepository struct {
-	Config *Config
-	db     *sql.DB
+	Config             *Config
+	db                 *sql.DB
+	prometheusRegistry prometheus.Registerer
 }
 
 // NewSQLRepository creates a new SQLRepository
-func NewSQLRepository(config *Config) *SQLRepository {
+func NewSQLRepository(config *Config, registry prometheus.Registerer) *SQLRepository {
 	return &SQLRepository{
 		config,
 		nil,
+		registry,
 	}
 }
 
@@ -58,6 +63,9 @@ func (r *SQLRepository) Open() error {
 	r.db.SetConnMaxLifetime(r.Config.ConnMaxLifetime)
 	r.db.SetMaxIdleConns(r.Config.MaxIdleConns)
 	r.db.SetMaxOpenConns(r.Config.MaxOpenConns)
+
+	collector := sqlstats.NewStatsCollector(r.Config.DBName, r.db)
+	r.prometheusRegistry.MustRegister(collector)
 
 	return nil
 }

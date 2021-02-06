@@ -35,7 +35,7 @@ func setupLogging() {
 	}
 }
 
-func setupSQLRepository() (*sqlrepo.SQLRepository, error) {
+func setupSQLRepository(registry *prometheus.Registry) (*sqlrepo.SQLRepository, error) {
 	repo := sqlrepo.NewSQLRepository(&sqlrepo.Config{
 		Driver:          sqlrepo.PostgreSQLDriver,
 		Host:            config.Config.SQL.Host,
@@ -47,7 +47,7 @@ func setupSQLRepository() (*sqlrepo.SQLRepository, error) {
 		ConnMaxLifetime: config.Config.SQL.ConnMaxLifeTime,
 		MaxIdleConns:    config.Config.SQL.MaxIdleConns,
 		MaxOpenConns:    config.Config.SQL.MaxOpenConns,
-	})
+	}, registry)
 
 	if err := repo.Open(); err != nil {
 		return nil, fmt.Errorf("Failed to open SQL repository. %w", err)
@@ -78,13 +78,13 @@ func setup() (*sqlrepo.SQLRepository, *httpapi.HTTPServer, *metrics.Server, erro
 	}
 
 	setupLogging()
+	metricsServer := metrics.NewMetricsServer(config.Config.Metrics.Path)
 
-	repo, err := setupSQLRepository()
+	repo, err := setupSQLRepository(metricsServer.Registry)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("Failed to setup SQL repository. %w", err)
 	}
 
-	metricsServer := metrics.NewMetricsServer(config.Config.Metrics.Path)
 	httpServer := setupHTTPAPI(repo, metricsServer.Registry)
 
 	return repo, httpServer, metricsServer, nil
