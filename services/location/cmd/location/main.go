@@ -37,7 +37,6 @@ func setupLogging() {
 
 func setupSQLRepository(registry *prometheus.Registry) (*sqlrepo.SQLRepository, error) {
 	repo := sqlrepo.NewSQLRepository(&sqlrepo.Config{
-		Driver:          sqlrepo.PostgreSQLDriver,
 		Host:            config.Config.SQL.Host,
 		Port:            config.Config.SQL.Port,
 		User:            config.Config.SQL.User,

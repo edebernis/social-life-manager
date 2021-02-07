@@ -7,6 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/edebernis/social-life-manager/services/location/internal/models"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +22,7 @@ func newSQLMock(t *testing.T) (*SQLRepository, sqlmock.Sqlmock) {
 	repo := &SQLRepository{
 		&Config{},
 		db,
-		nil,
+		prometheus.NewRegistry(),
 	}
 
 	return repo, mock
@@ -34,7 +35,6 @@ func newTestContext() context.Context {
 
 func TestPostgresConnectionStringWithoutSSL(t *testing.T) {
 	repo := NewSQLRepository(&Config{
-		Driver:   PostgreSQLDriver,
 		Host:     "localhost",
 		Port:     5432,
 		User:     "test",
@@ -43,15 +43,11 @@ func TestPostgresConnectionStringWithoutSSL(t *testing.T) {
 		SSL:      false,
 	}, nil)
 
-	connectionStr, err := repo.getConnectionString()
-
-	assert.NoError(t, err)
-	assert.Equal(t, connectionStr, "host=localhost port=5432 user=test password=test dbname=test sslmode=disable")
+	assert.Equal(t, repo.dsn(), "host=localhost port=5432 user=test password=test dbname=test sslmode=disable")
 }
 
 func TestPostgresConnectionStringWithSSL(t *testing.T) {
 	repo := NewSQLRepository(&Config{
-		Driver:   PostgreSQLDriver,
 		Host:     "localhost",
 		Port:     5432,
 		User:     "test",
@@ -60,26 +56,7 @@ func TestPostgresConnectionStringWithSSL(t *testing.T) {
 		SSL:      true,
 	}, nil)
 
-	connectionStr, err := repo.getConnectionString()
-
-	assert.NoError(t, err)
-	assert.Equal(t, connectionStr, "host=localhost port=5432 user=test password=test dbname=test sslmode=enable")
-}
-
-func TestUnknownDriverConnectionString(t *testing.T) {
-	repo := NewSQLRepository(&Config{
-		Driver:   "unknown",
-		Host:     "localhost",
-		Port:     5432,
-		User:     "test",
-		Password: "test",
-		DBName:   "test",
-		SSL:      false,
-	}, nil)
-
-	_, err := repo.getConnectionString()
-
-	assert.Error(t, err)
+	assert.Equal(t, repo.dsn(), "host=localhost port=5432 user=test password=test dbname=test sslmode=enable")
 }
 
 func TestPingRepositoryWithError(t *testing.T) {

@@ -7,7 +7,14 @@ import (
 	"time"
 
 	"github.com/dlmiddlecote/sqlstats"
+	"github.com/lib/pq"
+	"github.com/ngrok/sqlmw"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sirupsen/logrus"
+)
+
+var (
+	logger = logrus.WithField("package", "sqlrepository")
 )
 
 const (
@@ -33,7 +40,6 @@ func NewSQLRepository(config *Config, registry prometheus.Registerer) *SQLReposi
 
 // Config describes configs and options of SQL repository
 type Config struct {
-	Driver          string
 	Host            string
 	Port            int
 	User            string
@@ -48,12 +54,12 @@ type Config struct {
 
 // Open opens DB handler
 func (r *SQLRepository) Open() error {
-	connectionStr, err := r.getConnectionString()
-	if err != nil {
-		return fmt.Errorf("Failed to set connection string. %w", err)
-	}
+	sql.Register("postgres-mw", sqlmw.Driver(
+		pq.Driver{},
+		newSQLInterceptor(r.prometheusRegistry),
+	))
 
-	db, err := sql.Open(r.Config.Driver, connectionStr)
+	db, err := sql.Open("postgres-mw", r.dsn())
 	if err != nil {
 		return fmt.Errorf("Failed to open connection to repository. %w", err)
 	}
@@ -64,6 +70,7 @@ func (r *SQLRepository) Open() error {
 	r.db.SetMaxIdleConns(r.Config.MaxIdleConns)
 	r.db.SetMaxOpenConns(r.Config.MaxOpenConns)
 
+	// Collect metrics about connection pool
 	collector := sqlstats.NewStatsCollector(r.Config.DBName, r.db)
 	r.prometheusRegistry.MustRegister(collector)
 
@@ -82,16 +89,7 @@ func (r *SQLRepository) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (r *SQLRepository) getConnectionString() (string, error) {
-	switch r.Config.Driver {
-	case PostgreSQLDriver:
-		return r.newPostgresConnectionString(), nil
-	default:
-		return "", fmt.Errorf("Unknown SQL driver : %s", r.Config.Driver)
-	}
-}
-
-func (r *SQLRepository) newPostgresConnectionString() string {
+func (r *SQLRepository) dsn() string {
 	var sslmode string
 	if r.Config.SSL {
 		sslmode = "enable"

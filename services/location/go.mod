@@ -11,6 +11,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/lib/pq v1.9.0
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
+	github.com/ngrok/sqlmw v0.0.0-20200129213757-d5c93a81bec6
 	github.com/prometheus/client_golang v1.8.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/viper v1.7.1
