@@ -50,6 +50,7 @@ type Config struct {
 	ConnMaxLifetime time.Duration
 	MaxIdleConns    int
 	MaxOpenConns    int
+	QueryTimeout    time.Duration
 }
 
 // Open opens DB handler

@@ -15,7 +15,10 @@ type appConfig struct {
 	Debug bool
 
 	API struct {
-		HTTPBindAddr string
+		HTTPBindAddr          string
+		HTTPReadHeaderTimeout time.Duration
+		HTTPReadTimeout       time.Duration
+		HTTPWriteTimeout      time.Duration
 	}
 	Metrics struct {
 		BindAddr string
@@ -31,6 +34,7 @@ type appConfig struct {
 		ConnMaxLifeTime time.Duration
 		MaxIdleConns    int
 		MaxOpenConns    int
+		QueryTimeout    time.Duration
 	}
 	JWT struct {
 		Algorithm string
@@ -62,6 +66,9 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("debug", false)
 
 	v.SetDefault("api.httpBindAddr", ":8080")
+	v.SetDefault("api.httpReadHeaderTimeout", 20*time.Second)
+	v.SetDefault("api.httpReadTimeout", 1*time.Minute)
+	v.SetDefault("api.httpWriteTimeout", 2*time.Minute)
 
 	v.SetDefault("metrics.bindAddr", ":2112")
 	v.SetDefault("metrics.path", "/metrics")
@@ -71,10 +78,11 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("sql.user", "postgres")
 	v.SetDefault("sql.password", "")
 	v.SetDefault("sql.db", "postgres")
-	v.SetDefault("sql.connMaxIdleTime", time.Second*60)
-	v.SetDefault("sql.connMaxLifeTime", time.Second*60)
+	v.SetDefault("sql.connMaxIdleTime", 60*time.Second)
+	v.SetDefault("sql.connMaxLifeTime", 60*time.Second)
 	v.SetDefault("sql.maxIdleConns", 10)
 	v.SetDefault("sql.maxOpenConns", 50)
+	v.SetDefault("sql.queryTimeout", 5*time.Second)
 
 	v.SetDefault("jwt.algorithm", "HS256")
 	v.SetDefault("jwt.secret", "")

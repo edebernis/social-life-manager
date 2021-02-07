@@ -46,6 +46,7 @@ func setupSQLRepository(registry *prometheus.Registry) (*sqlrepo.SQLRepository, 
 		ConnMaxLifetime: config.Config.SQL.ConnMaxLifeTime,
 		MaxIdleConns:    config.Config.SQL.MaxIdleConns,
 		MaxOpenConns:    config.Config.SQL.MaxOpenConns,
+		QueryTimeout:    config.Config.SQL.QueryTimeout,
 	}, registry)
 
 	if err := repo.Open(); err != nil {
@@ -64,8 +65,11 @@ func setupHTTPAPI(repo *sqlrepo.SQLRepository, registry *prometheus.Registry) *h
 	api := api.NewAPI(usecase)
 
 	server := httpapi.NewHTTPServer(api, registry, &httpapi.Config{
-		JWTAlgorithm: config.Config.JWT.Algorithm,
-		JWTSecretKey: config.Config.JWT.Secret,
+		ReadHeaderTimeout: config.Config.API.HTTPReadHeaderTimeout,
+		ReadTimeout:       config.Config.API.HTTPReadTimeout,
+		WriteTimeout:      config.Config.API.HTTPWriteTimeout,
+		JWTAlgorithm:      config.Config.JWT.Algorithm,
+		JWTSecretKey:      config.Config.JWT.Secret,
 	})
 
 	return server

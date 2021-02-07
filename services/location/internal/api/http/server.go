@@ -71,7 +71,10 @@ func NewHTTPServer(api *api.API, registry prometheus.Registerer, config *Config)
 		api,
 		router,
 		&http.Server{
-			Handler: router,
+			Handler:           router,
+			ReadHeaderTimeout: config.ReadHeaderTimeout,
+			ReadTimeout:       config.ReadTimeout,
+			WriteTimeout:      config.WriteTimeout,
 		},
 	}
 	s.routes()
@@ -81,6 +84,11 @@ func NewHTTPServer(api *api.API, registry prometheus.Registerer, config *Config)
 
 // Config advanced settings of HTTP API server
 type Config struct {
+	// HTTP server timeouts
+	ReadHeaderTimeout time.Duration
+	ReadTimeout       time.Duration
+	WriteTimeout      time.Duration
+
 	// Signing algorithm used for JWT
 	JWTAlgorithm string
 	// Key to check JWT signature

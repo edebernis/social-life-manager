@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/edebernis/social-life-manager/services/location/internal/models"
@@ -20,7 +21,7 @@ func newSQLMock(t *testing.T) (*SQLRepository, sqlmock.Sqlmock) {
 		t.FailNow()
 	}
 	repo := &SQLRepository{
-		&Config{},
+		&Config{QueryTimeout: 5 * time.Second},
 		db,
 		prometheus.NewRegistry(),
 	}
@@ -33,7 +34,7 @@ func newTestContext() context.Context {
 	return models.NewContextWithUser(context.Background(), user)
 }
 
-func TestPostgresConnectionStringWithoutSSL(t *testing.T) {
+func TestPostgresDSNWithoutSSL(t *testing.T) {
 	repo := NewSQLRepository(&Config{
 		Host:     "localhost",
 		Port:     5432,
@@ -46,7 +47,7 @@ func TestPostgresConnectionStringWithoutSSL(t *testing.T) {
 	assert.Equal(t, repo.dsn(), "host=localhost port=5432 user=test password=test dbname=test sslmode=disable")
 }
 
-func TestPostgresConnectionStringWithSSL(t *testing.T) {
+func TestPostgresDSNWithSSL(t *testing.T) {
 	repo := NewSQLRepository(&Config{
 		Host:     "localhost",
 		Port:     5432,

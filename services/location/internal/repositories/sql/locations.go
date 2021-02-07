@@ -5,14 +5,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/edebernis/social-life-manager/services/location/internal/models"
 )
 
 // CreateCategory creates a new category in repository
 func (r *SQLRepository) CreateCategory(ctx context.Context, cat *models.Category) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "INSERT INTO categories (id, name) VALUES ($1, $2)"
@@ -32,7 +31,7 @@ func (r *SQLRepository) CreateCategory(ctx context.Context, cat *models.Category
 
 // GetCategories fetches all categories in repository
 func (r *SQLRepository) GetCategories(ctx context.Context) (*models.Categories, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "SELECT id, name FROM categories"
@@ -66,7 +65,7 @@ func (r *SQLRepository) GetCategories(ctx context.Context) (*models.Categories, 
 
 // FindCategoryByID returns category matching specified ID or nil
 func (r *SQLRepository) FindCategoryByID(ctx context.Context, id models.ID) (*models.Category, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "SELECT id, name FROM categories WHERE id = $1"
@@ -90,7 +89,7 @@ func (r *SQLRepository) FindCategoryByID(ctx context.Context, id models.ID) (*mo
 
 // FindCategoryByName returns category matching specified name or nil
 func (r *SQLRepository) FindCategoryByName(ctx context.Context, name string) (*models.Category, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "SELECT id, name FROM categories WHERE name = $1"
@@ -114,7 +113,7 @@ func (r *SQLRepository) FindCategoryByName(ctx context.Context, name string) (*m
 
 // UpdateCategory updates category in repository
 func (r *SQLRepository) UpdateCategory(ctx context.Context, cat *models.Category) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "UPDATE categories SET name = $1 WHERE id = $2"
@@ -134,7 +133,7 @@ func (r *SQLRepository) UpdateCategory(ctx context.Context, cat *models.Category
 
 // DeleteCategory deletes category in repository
 func (r *SQLRepository) DeleteCategory(ctx context.Context, id models.ID) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "DELETE FROM categories WHERE id = $1"
@@ -154,7 +153,7 @@ func (r *SQLRepository) DeleteCategory(ctx context.Context, id models.ID) error 
 
 // CreateLocation creates a new user location in repository
 func (r *SQLRepository) CreateLocation(ctx context.Context, loc *models.Location) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "INSERT INTO locations (id, name, address, category_id, user_id) VALUES ($1, $2, $3, $4, $5)"
@@ -174,7 +173,7 @@ func (r *SQLRepository) CreateLocation(ctx context.Context, loc *models.Location
 
 // GetLocations returns all user locations stored in the repository
 func (r *SQLRepository) GetLocations(ctx context.Context) (*models.Locations, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE user_id = $1"
@@ -213,7 +212,7 @@ func (r *SQLRepository) GetLocations(ctx context.Context) (*models.Locations, er
 
 // FindLocationByID returns the user location that matches the requested ID or nil
 func (r *SQLRepository) FindLocationByID(ctx context.Context, id models.ID) (*models.Location, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE id = $1 AND user_id = $2"
@@ -242,7 +241,7 @@ func (r *SQLRepository) FindLocationByID(ctx context.Context, id models.ID) (*mo
 
 // FindLocationByName returns the user location that matches the requested name or nil
 func (r *SQLRepository) FindLocationByName(ctx context.Context, name string) (*models.Location, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE name = $1 AND user_id = $2"
@@ -271,7 +270,7 @@ func (r *SQLRepository) FindLocationByName(ctx context.Context, name string) (*m
 
 // FindLocationsByCategory returns all user locations filtered by specified category
 func (r *SQLRepository) FindLocationsByCategory(ctx context.Context, cat *models.Category) (*models.Locations, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "SELECT id, name, address, category_id, user_id FROM locations WHERE category_id = $1 AND user_id = $2"
@@ -310,7 +309,7 @@ func (r *SQLRepository) FindLocationsByCategory(ctx context.Context, cat *models
 
 // UpdateLocation updates specified location in repository
 func (r *SQLRepository) UpdateLocation(ctx context.Context, loc *models.Location) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "UPDATE locations SET name = $1, address = $2, category_id = $3 WHERE id = $4 AND user_id = $5"
@@ -330,7 +329,7 @@ func (r *SQLRepository) UpdateLocation(ctx context.Context, loc *models.Location
 
 // DeleteLocation deletes location in repository
 func (r *SQLRepository) DeleteLocation(ctx context.Context, id models.ID) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, r.Config.QueryTimeout)
 	defer cancel()
 
 	query := "DELETE FROM locations WHERE id = $1 AND user_id = $2"
