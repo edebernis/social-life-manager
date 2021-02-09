@@ -86,6 +86,9 @@ clean: clean-bin clean-cache
 version:
 	@echo $(VERSION)
 
+protobuf:
+	protoc --go_out=. internal/api/grpc/v1/location.proto
+
 migrate.up:
 	migrate -database $(POSTGRESQL_URL) -path internal/repositories/sql/migrations up
 

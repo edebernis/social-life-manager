@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+package location.v1;
+
+option go_package = "internal/api/grpc/v1;grpcapi";
+
+service LocationService {
+    // Creates a new category.
+    rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {}
+    // Retrieve all location categories.
+    rpc GetCategories(GetCategoriesRequest) returns (GetCategoriesResponse) {}
+    // Retrieve one specific category.
+    rpc GetCategory(GetCategoryRequest) returns (GetCategoryResponse) {}
+    // Update one category.
+    rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse) {}
+    // Delete one category.
+    rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse) {}
+
+    // Creates a new user location.
+    rpc CreateLocation(CreateLocationRequest) returns (CreateLocationResponse) {}
+    // Retrieve all user locations.
+    rpc GetLocations(GetLocationsRequest) returns (GetLocationsResponse) {}
+    // Retrieve one specific user location.
+    rpc GetLocation(GetLocationRequest) returns (GetLocationResponse) {}
+    // Update one user location.
+    rpc UpdateLocation(UpdateLocationRequest) returns (UpdateLocationResponse) {}
+    // Delete one user location.
+    rpc DeleteLocation(DeleteLocationRequest) returns (DeleteLocationResponse) {}
+}
+
+message Category {
+    // Category ID. Must be unique.
+    string id = 1;
+    // Short descriptive name of the category. Like "Homes" or "Tennis Center".
+    string name = 2;
+}
+
+message Location {
+    // Location ID. Must be unique.
+    string id = 1;
+    // Short descriptive name of the location, like "Home" or "Work".
+    string name = 2;
+    // Full address of the location. Should contains at least street, postal code and city.
+    string address = 3;
+    // Location category foreign key.
+    string category_id = 4;
+    // User ID. Owner of the location.
+    string user_id = 5;
+}
+
+message CreateCategoryRequest {
+    // Category to be created.
+    Category category = 1;
+}
+
+message CreateCategoryResponse {
+    // Created category with its ID.
+    Category category = 1;
+}
+
+message GetCategoriesRequest {}
+
+message GetCategoriesResponse {
+    // All location categories.
+    repeated Category categories = 1;
+}
+
+message GetCategoryRequest {
+    // Category ID to retrieve.
+    string id = 1;
+}
+
+message GetCategoryResponse {
+    // Fetched category.
+    Category category = 1;
+}
+
+message UpdateCategoryRequest {
+    // Category to be updated.
+    Category category = 1;
+}
+
+message UpdateCategoryResponse {
+    // Updated category.
+    Category category = 1;
+}
+
+message DeleteCategoryRequest {
+    // Category to be deleted.
+    string id = 1;
+}
+
+message DeleteCategoryResponse {}
+
+message CreateLocationRequest {
+    // Location to be created.
+    Location location = 1;
+}
+
+message CreateLocationResponse {
+    // Created user location with its ID.
+    Location location = 1;
+}
+
+message GetLocationsRequest {}
+
+message GetLocationsResponse {
+    // All user locations.
+    repeated Category categories = 1;
+}
+
+message GetLocationRequest {
+    // Location ID to retrieve.
+    string id = 1;
+}
+
+message GetLocationResponse {
+    // Fetched location.
+    Location location = 1;
+}
+
+message UpdateLocationRequest {
+    // Location to be updated.
+    Location location = 1;
+}
+
+message UpdateLocationResponse {
+    // Updated location.
+    Location location = 1;
+}
+
+message DeleteLocationRequest {
+    // Location to be deleted.
+    string id = 1;
+}
+
+message DeleteLocationResponse {}

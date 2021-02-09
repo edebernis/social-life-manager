@@ -8,6 +8,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dlmiddlecote/sqlstats v1.0.1
 	github.com/gin-gonic/gin v1.6.3
+	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.1.2
 	github.com/lib/pq v1.9.0
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
@@ -17,4 +18,5 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/swag v1.6.9
+	google.golang.org/protobuf v1.23.0
 )
