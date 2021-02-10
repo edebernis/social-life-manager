@@ -32,6 +32,6 @@ echo "OK"
 
 echo "Building API docs:"
 swag init                           \
-    -g internal/api/http/server.go  \
-    -o ./api
+    -g internal/api/http/v1/server.go  \
+    -o ./api/http/v1
 echo "OK"

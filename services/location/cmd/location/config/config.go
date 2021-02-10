@@ -19,6 +19,7 @@ type appConfig struct {
 		HTTPReadHeaderTimeout time.Duration
 		HTTPReadTimeout       time.Duration
 		HTTPWriteTimeout      time.Duration
+		GRPCBindAddr          string
 	}
 	Metrics struct {
 		BindAddr string
@@ -69,6 +70,8 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("api.httpReadHeaderTimeout", 20*time.Second)
 	v.SetDefault("api.httpReadTimeout", 1*time.Minute)
 	v.SetDefault("api.httpWriteTimeout", 2*time.Minute)
+
+	v.SetDefault("api.grpcBindAddr", ":9090")
 
 	v.SetDefault("metrics.bindAddr", ":2112")
 	v.SetDefault("metrics.path", "/metrics")

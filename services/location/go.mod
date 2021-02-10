@@ -18,5 +18,6 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/swag v1.6.9
+	google.golang.org/grpc v1.26.0
 	google.golang.org/protobuf v1.23.0
 )

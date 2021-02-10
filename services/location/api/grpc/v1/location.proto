@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package location.v1;
 
-option go_package = "internal/api/grpc/v1;grpcapi";
+option go_package = "api/grpc/v1";
 
 service LocationService {
     // Creates a new category.

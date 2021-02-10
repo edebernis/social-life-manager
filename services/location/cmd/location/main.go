@@ -12,12 +12,14 @@ import (
 	"github.com/edebernis/social-life-manager/services/location/cmd/location/config"
 	"github.com/edebernis/social-life-manager/services/location/cmd/location/metrics"
 	"github.com/edebernis/social-life-manager/services/location/internal/api"
-	httpapi "github.com/edebernis/social-life-manager/services/location/internal/api/http"
+	grpcapi "github.com/edebernis/social-life-manager/services/location/internal/api/grpc/v1"
+	httpapi "github.com/edebernis/social-life-manager/services/location/internal/api/http/v1"
 	sqlrepo "github.com/edebernis/social-life-manager/services/location/internal/repositories/sql"
 	"github.com/edebernis/social-life-manager/services/location/internal/usecases"
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -60,24 +62,23 @@ func setupSQLRepository(registry *prometheus.Registry) (*sqlrepo.SQLRepository, 
 	return repo, nil
 }
 
-func setupHTTPAPI(repo *sqlrepo.SQLRepository, registry *prometheus.Registry) *httpapi.HTTPServer {
-	usecase := usecases.NewLocationUsecase(repo)
-	api := api.NewAPI(usecase)
-
-	server := httpapi.NewHTTPServer(api, registry, &httpapi.Config{
+func setupHTTPAPI(api *api.API, registry *prometheus.Registry) *httpapi.HTTPServer {
+	return httpapi.NewHTTPServer(api, registry, &httpapi.Config{
 		ReadHeaderTimeout: config.Config.API.HTTPReadHeaderTimeout,
 		ReadTimeout:       config.Config.API.HTTPReadTimeout,
 		WriteTimeout:      config.Config.API.HTTPWriteTimeout,
 		JWTAlgorithm:      config.Config.JWT.Algorithm,
 		JWTSecretKey:      config.Config.JWT.Secret,
 	})
-
-	return server
 }
 
-func setup() (*sqlrepo.SQLRepository, *httpapi.HTTPServer, *metrics.Server, error) {
+func setupGRPCAPI(api *api.API, registry *prometheus.Registry) *grpcapi.GRPCServer {
+	return grpcapi.NewGRPCServer(api, registry, &grpcapi.Config{})
+}
+
+func setup() (*sqlrepo.SQLRepository, *httpapi.HTTPServer, *grpcapi.GRPCServer, *metrics.Server, error) {
 	if err := config.LoadConfig(); err != nil {
-		return nil, nil, nil, fmt.Errorf("Failed to load configuration. %w", err)
+		return nil, nil, nil, nil, fmt.Errorf("Failed to load configuration. %w", err)
 	}
 
 	setupLogging()
@@ -85,16 +86,20 @@ func setup() (*sqlrepo.SQLRepository, *httpapi.HTTPServer, *metrics.Server, erro
 
 	repo, err := setupSQLRepository(metricsServer.Registry)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("Failed to setup SQL repository. %w", err)
+		return nil, nil, nil, nil, fmt.Errorf("Failed to setup SQL repository. %w", err)
 	}
 
-	httpServer := setupHTTPAPI(repo, metricsServer.Registry)
+	usecase := usecases.NewLocationUsecase(repo)
+	api := api.NewAPI(usecase)
 
-	return repo, httpServer, metricsServer, nil
+	httpServer := setupHTTPAPI(api, metricsServer.Registry)
+	grpcServer := setupGRPCAPI(api, metricsServer.Registry)
+
+	return repo, httpServer, grpcServer, metricsServer, nil
 }
 
 func main() {
-	repo, httpServer, metricsServer, err := setup()
+	repo, httpServer, grpcServer, metricsServer, err := setup()
 	if err != nil {
 		logger.Fatalf("Failed to setup application. %v", err)
 	}
@@ -113,6 +118,13 @@ func main() {
 		}
 	}()
 
+	logger.Infof("Start GRPC API server listening on address %s", config.Config.API.GRPCBindAddr)
+	go func() {
+		if err := httpServer.Serve(config.Config.API.GRPCBindAddr); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+			logger.Fatalf("Failed to start GRPC API server : %v", err)
+		}
+	}()
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
@@ -124,6 +136,9 @@ func main() {
 	}
 	if err := httpServer.Shutdown(); err != nil {
 		logger.Errorf("Failed to shutdown gracefully API HTTP server. %s", err)
+	}
+	if err := grpcServer.Shutdown(); err != nil {
+		logger.Errorf("Failed to shutdown gracefully API GRPC server. %s", err)
 	}
 	if err := repo.Close(); err != nil {
 		logger.Errorf("Failed to close repository. %s", err)
