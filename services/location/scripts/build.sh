@@ -24,14 +24,23 @@ export GOARCH="${ARCH}"
 export GOOS="${OS}"
 export GOFLAGS="-mod=vendor"
 
+echo "Compiling proto files:"
+protoc                                      \
+    --go_out=.                              \
+    --go_opt=paths=source_relative          \
+    --go-grpc_out=.                         \
+    --go-grpc_opt=paths=source_relative     \
+    api/grpc/v1/location.proto
+echo "OK"
+
 echo "Building app:"
-go install                      \
-    -installsuffix "static"     \
+go install                  \
+    -installsuffix "static" \
     ./...
 echo "OK"
 
 echo "Building API docs:"
-swag init                           \
-    -g internal/api/http/v1/server.go  \
+swag init                               \
+    -g internal/api/http/v1/server.go   \
     -o ./api/http/v1
 echo "OK"

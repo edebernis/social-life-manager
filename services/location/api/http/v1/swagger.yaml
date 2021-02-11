@@ -88,6 +88,33 @@ definitions:
         type: string
         x-order: "5"
     type: object
+  models.UpdateCategory:
+    properties:
+      name:
+        description: Short descriptive name of the category, like "Homes" or "Sport".
+        example: Homes
+        type: string
+        x-order: "1"
+    type: object
+  models.UpdateLocation:
+    properties:
+      address:
+        description: Full address of the location. Should contains at least street,
+          postal code and city.
+        example: 1 rue de la Poste, 75001 Paris
+        type: string
+        x-order: "2"
+      category_id:
+        description: Location category foreign key.
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+        x-order: "3"
+      name:
+        description: Short descriptive name of the location, like "Home" or "Work".
+        example: Home
+        type: string
+        x-order: "1"
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -220,7 +247,7 @@ paths:
         in: body
         name: name
         schema:
-          type: string
+          $ref: '#/definitions/models.UpdateCategory'
       produces:
       - application/json
       responses:
@@ -373,21 +400,12 @@ paths:
         name: id
         required: true
         type: string
-      - description: Location name
+      - description: Updated location
         in: body
-        name: name
+        name: location
+        required: true
         schema:
-          type: string
-      - description: Location address
-        in: body
-        name: address
-        schema:
-          type: string
-      - description: Location category
-        in: body
-        name: category_id
-        schema:
-          type: string
+          $ref: '#/definitions/models.UpdateLocation'
       produces:
       - application/json
       responses:

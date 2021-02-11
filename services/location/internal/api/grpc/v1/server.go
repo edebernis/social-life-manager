@@ -1,9 +1,9 @@
 package grpcapi
 
 import (
-	"context"
 	"fmt"
 	"net"
+	"time"
 
 	pb "github.com/edebernis/social-life-manager/services/location/api/grpc/v1"
 	"github.com/edebernis/social-life-manager/services/location/internal/api"
@@ -12,7 +12,9 @@ import (
 )
 
 // Config holds gRPC server configuration parameters
-type Config struct{}
+type Config struct {
+	ConnectionTimeout time.Duration
+}
 
 // GRPCServer runs the gRPC service. It implements the Server interface.
 type GRPCServer struct {
@@ -24,10 +26,12 @@ type GRPCServer struct {
 // NewGRPCServer builds and register a new gRPC server
 func NewGRPCServer(api *api.API, registry prometheus.Registerer, config *Config) *GRPCServer {
 	s := &GRPCServer{
-		server: grpc.NewServer(),
+		server: grpc.NewServer(
+			grpc.ConnectionTimeout(config.ConnectionTimeout),
+		),
 	}
-	pb.RegisterLocationServiceServer(s.server, s)
 
+	pb.RegisterLocationServiceServer(s.server, s)
 	return s
 }
 
@@ -45,9 +49,4 @@ func (s *GRPCServer) Serve(addr string) error {
 func (s *GRPCServer) Shutdown() error {
 	s.server.GracefulStop()
 	return nil
-}
-
-// CreateCategory creates a new category
-func (s *GRPCServer) CreateCategory(ctx context.Context, req *pb.CreateCategoryRequest) (*pb.CreateCategoryResponse, error) {
-	return nil, nil
 }

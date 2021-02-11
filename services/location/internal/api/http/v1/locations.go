@@ -114,7 +114,7 @@ func (s *HTTPServer) handleCategoriesGetByID(c *gin.Context) {
 // @Tags categories
 // @Produce  json
 // @Param id path string true "Category ID"
-// @Param name body string false "Category name"
+// @Param name body models.UpdateCategory false "Category name"
 // @Success 200 {object} models.Category "The updated category"
 // @Failure 400 {object} HTTPError "Bad Request"
 // @Failure 404 {object} HTTPError "Not Found"
@@ -128,7 +128,7 @@ func (s *HTTPServer) handleCategoriesUpdate(c *gin.Context) {
 		return
 	}
 
-	var body models.UpdateCategoryBody
+	var body models.UpdateCategory
 	if err := c.ShouldBindJSON(&body); err != nil {
 		logger.Errorf("CategoriesUpdate: invalid body. %v", err)
 		abort(c, http.StatusBadRequest, "Invalid body")
@@ -338,9 +338,7 @@ func (s *HTTPServer) handleLocationsGetByID(c *gin.Context) {
 // @Tags locations
 // @Produce  json
 // @Param id path string true "Location ID"
-// @Param name body string false "Location name"
-// @Param address body string false "Location address"
-// @Param category_id body string false "Location category"
+// @Param location body models.UpdateLocation true "Updated location"
 // @Success 200 {object} models.Location "The updated location"
 // @Failure 400 {object} HTTPError "Bad Request"
 // @Failure 404 {object} HTTPError "Not Found"
@@ -354,7 +352,7 @@ func (s *HTTPServer) handleLocationsUpdate(c *gin.Context) {
 		return
 	}
 
-	var body models.UpdateLocationBody
+	var body models.UpdateLocation
 	if err := c.ShouldBindJSON(&body); err != nil {
 		logger.Errorf("LocationsUpdate: invalid body. %v", err)
 		abort(c, http.StatusBadRequest, "Invalid body")

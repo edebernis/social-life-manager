@@ -64,16 +64,18 @@ func setupSQLRepository(registry *prometheus.Registry) (*sqlrepo.SQLRepository, 
 
 func setupHTTPAPI(api *api.API, registry *prometheus.Registry) *httpapi.HTTPServer {
 	return httpapi.NewHTTPServer(api, registry, &httpapi.Config{
-		ReadHeaderTimeout: config.Config.API.HTTPReadHeaderTimeout,
-		ReadTimeout:       config.Config.API.HTTPReadTimeout,
-		WriteTimeout:      config.Config.API.HTTPWriteTimeout,
+		ReadHeaderTimeout: config.Config.API.HTTP.ReadHeaderTimeout,
+		ReadTimeout:       config.Config.API.HTTP.ReadTimeout,
+		WriteTimeout:      config.Config.API.HTTP.WriteTimeout,
 		JWTAlgorithm:      config.Config.JWT.Algorithm,
 		JWTSecretKey:      config.Config.JWT.Secret,
 	})
 }
 
 func setupGRPCAPI(api *api.API, registry *prometheus.Registry) *grpcapi.GRPCServer {
-	return grpcapi.NewGRPCServer(api, registry, &grpcapi.Config{})
+	return grpcapi.NewGRPCServer(api, registry, &grpcapi.Config{
+		ConnectionTimeout: config.Config.API.GRPC.ConnectionTimeout,
+	})
 }
 
 func setup() (*sqlrepo.SQLRepository, *httpapi.HTTPServer, *grpcapi.GRPCServer, *metrics.Server, error) {
@@ -111,16 +113,16 @@ func main() {
 		}
 	}()
 
-	logger.Infof("Start HTTP API server listening on address %s", config.Config.API.HTTPBindAddr)
+	logger.Infof("Start HTTP API server listening on address %s", config.Config.API.HTTP.BindAddr)
 	go func() {
-		if err := httpServer.Serve(config.Config.API.HTTPBindAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := httpServer.Serve(config.Config.API.HTTP.BindAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Fatalf("Failed to start HTTP API server : %v", err)
 		}
 	}()
 
-	logger.Infof("Start GRPC API server listening on address %s", config.Config.API.GRPCBindAddr)
+	logger.Infof("Start GRPC API server listening on address %s", config.Config.API.GRPC.BindAddr)
 	go func() {
-		if err := httpServer.Serve(config.Config.API.GRPCBindAddr); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+		if err := httpServer.Serve(config.Config.API.GRPC.BindAddr); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 			logger.Fatalf("Failed to start GRPC API server : %v", err)
 		}
 	}()

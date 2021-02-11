@@ -47,8 +47,8 @@ type UpdateLocationQuery struct {
 	ID string `uri:"id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required,uuid" extensions:"x-order=1"`
 }
 
-// UpdateLocationBody validates body user input to update an existing location
-type UpdateLocationBody struct {
+// UpdateLocation validates body user input to update an existing location
+type UpdateLocation struct {
 	// Short descriptive name of the location, like "Home" or "Work".
 	Name string `json:"name" example:"Home" binding:"required_without_all" extensions:"x-order=1"`
 	// Full address of the location. Should contains at least street, postal code and city.
@@ -103,8 +103,8 @@ type UpdateCategoryQuery struct {
 	ID string `uri:"id" example:"550e8400-e29b-41d4-a716-446655440000" binding:"required,uuid" extensions:"x-order=1"`
 }
 
-// UpdateCategoryBody validates body user input to update an existing category
-type UpdateCategoryBody struct {
+// UpdateCategory validates body user input to update an existing category
+type UpdateCategory struct {
 	// Short descriptive name of the category, like "Homes" or "Sport".
 	Name string `json:"name" example:"Homes" binding:"required_without_all" extensions:"x-order=1"`
 }

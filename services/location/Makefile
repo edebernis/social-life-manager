@@ -45,7 +45,7 @@ test:
 	    SCRIPT=scripts/test.sh
 
 build-image:
-	@docker build -t $(BUILD_IMAGE) - < build/package/build.Dockerfile
+	@docker build --rm -t $(BUILD_IMAGE) - < build/package/build.Dockerfile
 
 run-build-script: build-image
 	@mkdir -p $(BUILD_DIR) .cache
@@ -69,7 +69,7 @@ run-build-script: build-image
 	    "
 
 .container: $(OUTBIN)
-	@docker build --build-arg bin=$(BIN) -t $(IMAGE):$(TAG) -t $(IMAGE):latest -f build/package/run.Dockerfile $(BUILD_DIR)
+	@docker build --rm --build-arg bin=$(BIN) -t $(IMAGE):$(TAG) -t $(IMAGE):latest -f build/package/run.Dockerfile $(BUILD_DIR)
 
 .push: .container
 	@docker push $(IMAGE):$(TAG)
@@ -85,9 +85,6 @@ clean: clean-bin clean-cache
 
 version:
 	@echo $(VERSION)
-
-protobuf:
-	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative api/grpc/v1/location.proto
 
 migrate.up:
 	migrate -database $(POSTGRESQL_URL) -path internal/repositories/sql/migrations up

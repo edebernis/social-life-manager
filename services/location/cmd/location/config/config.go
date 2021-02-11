@@ -15,11 +15,16 @@ type appConfig struct {
 	Debug bool
 
 	API struct {
-		HTTPBindAddr          string
-		HTTPReadHeaderTimeout time.Duration
-		HTTPReadTimeout       time.Duration
-		HTTPWriteTimeout      time.Duration
-		GRPCBindAddr          string
+		HTTP struct {
+			BindAddr          string
+			ReadHeaderTimeout time.Duration
+			ReadTimeout       time.Duration
+			WriteTimeout      time.Duration
+		}
+		GRPC struct {
+			BindAddr          string
+			ConnectionTimeout time.Duration
+		}
 	}
 	Metrics struct {
 		BindAddr string
@@ -66,12 +71,13 @@ func LoadConfig() error {
 func setDefaults(v *viper.Viper) {
 	v.SetDefault("debug", false)
 
-	v.SetDefault("api.httpBindAddr", ":8080")
-	v.SetDefault("api.httpReadHeaderTimeout", 20*time.Second)
-	v.SetDefault("api.httpReadTimeout", 1*time.Minute)
-	v.SetDefault("api.httpWriteTimeout", 2*time.Minute)
+	v.SetDefault("api.http.BindAddr", ":8080")
+	v.SetDefault("api.http.ReadHeaderTimeout", 20*time.Second)
+	v.SetDefault("api.http.ReadTimeout", 1*time.Minute)
+	v.SetDefault("api.http.WriteTimeout", 2*time.Minute)
 
-	v.SetDefault("api.grpcBindAddr", ":9090")
+	v.SetDefault("api.grpc.BindAddr", ":9090")
+	v.SetDefault("api.grpc.ConnectionTimeout", 2*time.Minute)
 
 	v.SetDefault("metrics.bindAddr", ":2112")
 	v.SetDefault("metrics.path", "/metrics")

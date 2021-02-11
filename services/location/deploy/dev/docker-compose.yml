@@ -4,6 +4,7 @@ services:
     image: local/location
     ports:
       - "8080:8080"
+      - "9090:9090"
       - "2112:2112"
     depends_on:
       - db
@@ -33,7 +34,7 @@ services:
     image: prom/prometheus
     restart: unless-stopped
     ports:
-      - "9090:9090"
+      - "9091:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
   grafana:
