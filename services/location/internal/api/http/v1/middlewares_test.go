@@ -12,23 +12,12 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/edebernis/social-life-manager/services/location/internal/models"
+	"github.com/edebernis/social-life-manager/services/location/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 )
-
-func newJWTToken(secret string, signingAlg string, claims jwt.Claims) (string, error) {
-	alg := jwt.GetSigningMethod(signingAlg)
-	token := jwt.NewWithClaims(alg, claims)
-
-	out, err := token.SignedString([]byte(secret))
-	if err != nil {
-		return "", fmt.Errorf("Failed to sign JWT token: %v", err)
-	}
-
-	return out, nil
-}
 
 func TestLoggerMiddlewareWithOKRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -250,7 +239,7 @@ func TestAuthMiddlewareWithInvalidSignatureToken(t *testing.T) {
 		t.FailNow()
 	}
 
-	token, err := newJWTToken(server.Config.JWTSecretKey, jwt.SigningMethodHS512.Name, nil)
+	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, jwt.SigningMethodHS512.Name, nil)
 	if err != nil {
 		t.FailNow()
 	}
@@ -276,7 +265,7 @@ func TestAuthMiddlewareWithoutUserIDInToken(t *testing.T) {
 		t.FailNow()
 	}
 
-	token, err := newJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, nil)
+	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, nil)
 	if err != nil {
 		t.FailNow()
 	}
@@ -313,7 +302,7 @@ func TestAuthMiddlewareWithExpiredToken(t *testing.T) {
 		},
 	}
 
-	token, err := newJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
+	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
 	if err != nil {
 		t.FailNow()
 	}
@@ -349,7 +338,7 @@ func TestAuthMiddlewareWithoutTokenSubject(t *testing.T) {
 		},
 	}
 
-	token, err := newJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
+	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
 	if err != nil {
 		t.FailNow()
 	}
@@ -395,7 +384,7 @@ func TestAuthMiddlewareWithValidToken(t *testing.T) {
 		},
 	}
 
-	token, err := newJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
+	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
 	if err != nil {
 		t.FailNow()
 	}

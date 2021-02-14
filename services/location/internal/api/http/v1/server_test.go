@@ -2,7 +2,6 @@ package httpapi
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -14,11 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-)
-
-var (
-	mockContextMatcher = mock.MatchedBy(func(ctx context.Context) bool { return true })
 )
 
 func newHandlerTestContext(t *testing.T, method, url string, payload *gin.H, params *[]gin.Param) (*gin.Context, *httptest.ResponseRecorder, *HTTPServer) {
@@ -39,12 +33,12 @@ func newHandlerTestContext(t *testing.T, method, url string, payload *gin.H, par
 	var body bytes.Buffer
 	err := json.NewEncoder(&body).Encode(payload)
 	if err != nil {
-		t.FailNow()
+		t.Fatal(err)
 	}
 
 	ctx.Request, err = http.NewRequest(method, url, &body)
 	if err != nil {
-		t.FailNow()
+		t.Fatal(err)
 	}
 	// URL parameters need to be set manually
 	if params != nil {

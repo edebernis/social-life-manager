@@ -47,7 +47,19 @@ test:
 build-image:
 	@docker build --rm -t $(BUILD_IMAGE) - < build/package/build.Dockerfile
 
-run-build-script: build-image
+download-dependencies:
+	@docker run                                                 \
+	    -i                                                      \
+	    --rm                                                    \
+	    -v $$(pwd):/src                                         \
+	    -w /src                                                 \
+		-v $$(pwd)/.cache:/.cache                               \
+	    --env HTTP_PROXY=$(HTTP_PROXY)                          \
+	    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
+	    $(BUILD_IMAGE)                                          \
+	    /bin/sh -c "go mod vendor"                              \
+
+run-build-script: build-image download-dependencies
 	@mkdir -p $(BUILD_DIR) .cache
 	@docker run                                                 \
 	    -i                                                      \

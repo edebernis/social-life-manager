@@ -24,6 +24,11 @@ type appConfig struct {
 		GRPC struct {
 			BindAddr          string
 			ConnectionTimeout time.Duration
+			AuthScheme        string
+		}
+		JWT struct {
+			Algorithm string
+			Secret    string
 		}
 	}
 	Metrics struct {
@@ -41,10 +46,6 @@ type appConfig struct {
 		MaxIdleConns    int
 		MaxOpenConns    int
 		QueryTimeout    time.Duration
-	}
-	JWT struct {
-		Algorithm string
-		Secret    string
 	}
 }
 
@@ -78,6 +79,10 @@ func setDefaults(v *viper.Viper) {
 
 	v.SetDefault("api.grpc.BindAddr", ":9090")
 	v.SetDefault("api.grpc.ConnectionTimeout", 2*time.Minute)
+	v.SetDefault("api.grpc.AuthScheme", "bearer")
+
+	v.SetDefault("api.jwt.algorithm", "HS256")
+	v.SetDefault("api.jwt.secret", "")
 
 	v.SetDefault("metrics.bindAddr", ":2112")
 	v.SetDefault("metrics.path", "/metrics")
@@ -92,7 +97,4 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("sql.maxIdleConns", 10)
 	v.SetDefault("sql.maxOpenConns", 50)
 	v.SetDefault("sql.queryTimeout", 5*time.Second)
-
-	v.SetDefault("jwt.algorithm", "HS256")
-	v.SetDefault("jwt.secret", "")
 }

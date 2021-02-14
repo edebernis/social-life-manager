@@ -9,6 +9,7 @@ import (
 	"github.com/edebernis/social-life-manager/services/location/internal/api/mocks"
 	"github.com/edebernis/social-life-manager/services/location/internal/models"
 	"github.com/edebernis/social-life-manager/services/location/internal/usecases"
+	"github.com/edebernis/social-life-manager/services/location/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -28,7 +29,7 @@ func TestV1CreateCategoryWithAlreadyExistsError(t *testing.T) {
 	}, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("CreateCategory", mockContextMatcher, mock.AnythingOfType("*models.Category")).
+		On("CreateCategory", utils.MockContextMatcher, mock.AnythingOfType("*models.Category")).
 		Return(usecases.ErrCategoryAlreadyExists)
 
 	server.handleCategoriesCreate(ctx)
@@ -42,7 +43,7 @@ func TestV1CreateCategoryWithError(t *testing.T) {
 	}, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("CreateCategory", mockContextMatcher, mock.AnythingOfType("*models.Category")).
+		On("CreateCategory", utils.MockContextMatcher, mock.AnythingOfType("*models.Category")).
 		Return(errors.New("failed"))
 
 	server.handleCategoriesCreate(ctx)
@@ -56,7 +57,7 @@ func TestV1CreateCategoryWithSuccess(t *testing.T) {
 	}, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("CreateCategory", mockContextMatcher, mock.AnythingOfType("*models.Category")).
+		On("CreateCategory", utils.MockContextMatcher, mock.AnythingOfType("*models.Category")).
 		Return(nil)
 
 	server.handleCategoriesCreate(ctx)
@@ -74,7 +75,7 @@ func TestV1GetCategoriesWithError(t *testing.T) {
 	ctx, _, server := newHandlerTestContext(t, "GET", "/api/v1/categories", nil, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("GetCategories", mockContextMatcher).
+		On("GetCategories", utils.MockContextMatcher).
 		Return(nil, errors.New("failed"))
 
 	server.handleCategoriesGet(ctx)
@@ -86,7 +87,7 @@ func TestV1GetCategoriesWithSuccess(t *testing.T) {
 	ctx, _, server := newHandlerTestContext(t, "GET", "/api/v1/categories", nil, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("GetCategories", mockContextMatcher).
+		On("GetCategories", utils.MockContextMatcher).
 		Return(&models.Categories{}, nil)
 
 	server.handleCategoriesGet(ctx)
@@ -111,7 +112,7 @@ func TestV1GetCategoriesByIDWithError(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("FindCategoryByID", mockContextMatcher, id).
+		On("FindCategoryByID", utils.MockContextMatcher, id).
 		Return(nil, errors.New("failed"))
 
 	server.handleCategoriesGetByID(ctx)
@@ -136,7 +137,7 @@ func TestV1GetCategoriesByIDWithCategoryNotFound(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("FindCategoryByID", mockContextMatcher, id).
+		On("FindCategoryByID", utils.MockContextMatcher, id).
 		Return(nil, usecases.ErrCategoryNotFound)
 
 	server.handleCategoriesGetByID(ctx)
@@ -195,7 +196,7 @@ func TestV1GetCategoriesByIDWithSuccess(t *testing.T) {
 	cat := models.NewCategory(id, "Test Category")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("FindCategoryByID", mockContextMatcher, id).
+		On("FindCategoryByID", utils.MockContextMatcher, id).
 		Return(cat, nil)
 
 	server.handleCategoriesGetByID(ctx)
@@ -229,7 +230,7 @@ func TestV1UpdateCategoryWithError(t *testing.T) {
 	cat := models.NewCategory(id, "Test Category")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("UpdateCategory", mockContextMatcher, cat).
+		On("UpdateCategory", utils.MockContextMatcher, cat).
 		Return(errors.New("failed"))
 
 	server.handleCategoriesUpdate(ctx)
@@ -257,7 +258,7 @@ func TestV1UpdateCategoryWithCategoryNotFound(t *testing.T) {
 	cat := models.NewCategory(id, "Test Category")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("UpdateCategory", mockContextMatcher, cat).
+		On("UpdateCategory", utils.MockContextMatcher, cat).
 		Return(usecases.ErrCategoryNotFound)
 
 	server.handleCategoriesUpdate(ctx)
@@ -341,7 +342,7 @@ func TestV1UpdateCategoryWithSuccess(t *testing.T) {
 	cat := models.NewCategory(id, "Test Category")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("UpdateCategory", mockContextMatcher, cat).
+		On("UpdateCategory", utils.MockContextMatcher, cat).
 		Return(nil)
 
 	server.handleCategoriesUpdate(ctx)
@@ -372,7 +373,7 @@ func TestV1DeleteCategoryWithError(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("DeleteCategory", mockContextMatcher, id).
+		On("DeleteCategory", utils.MockContextMatcher, id).
 		Return(errors.New(("failed")))
 
 	server.handleCategoriesDelete(ctx)
@@ -397,7 +398,7 @@ func TestV1DeleteCategoryWithCategoryNotFound(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("DeleteCategory", mockContextMatcher, id).
+		On("DeleteCategory", utils.MockContextMatcher, id).
 		Return(usecases.ErrCategoryNotFound)
 
 	server.handleCategoriesDelete(ctx)
@@ -455,7 +456,7 @@ func TestV1DeleteCategoryWithSuccess(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("DeleteCategory", mockContextMatcher, id).
+		On("DeleteCategory", utils.MockContextMatcher, id).
 		Return(nil)
 
 	server.handleCategoriesDelete(ctx)
@@ -516,7 +517,7 @@ func TestV1CreateLocationWithAlreadyExistsError(t *testing.T) {
 	}, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("CreateLocation", mockContextMatcher, mock.AnythingOfType("*models.Location")).
+		On("CreateLocation", utils.MockContextMatcher, mock.AnythingOfType("*models.Location")).
 		Return(usecases.ErrLocationAlreadyExists)
 
 	server.handleLocationsCreate(ctx)
@@ -532,7 +533,7 @@ func TestV1CreateLocationWithCategoryNotFoundError(t *testing.T) {
 	}, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("CreateLocation", mockContextMatcher, mock.AnythingOfType("*models.Location")).
+		On("CreateLocation", utils.MockContextMatcher, mock.AnythingOfType("*models.Location")).
 		Return(usecases.ErrCategoryNotFound)
 
 	server.handleLocationsCreate(ctx)
@@ -548,7 +549,7 @@ func TestV1CreateLocationWithError(t *testing.T) {
 	}, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("CreateLocation", mockContextMatcher, mock.AnythingOfType("*models.Location")).
+		On("CreateLocation", utils.MockContextMatcher, mock.AnythingOfType("*models.Location")).
 		Return(errors.New("failed"))
 
 	server.handleLocationsCreate(ctx)
@@ -564,7 +565,7 @@ func TestV1CreateLocationWithSuccess(t *testing.T) {
 	}, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("CreateLocation", mockContextMatcher, mock.AnythingOfType("*models.Location")).
+		On("CreateLocation", utils.MockContextMatcher, mock.AnythingOfType("*models.Location")).
 		Return(nil)
 
 	server.handleLocationsCreate(ctx)
@@ -587,7 +588,7 @@ func TestV1GetLocationsWithError(t *testing.T) {
 	ctx, _, server := newHandlerTestContext(t, "GET", "/api/v1/locations", nil, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("GetLocations", mockContextMatcher).
+		On("GetLocations", utils.MockContextMatcher).
 		Return(nil, errors.New("failed"))
 
 	server.handleLocationsGet(ctx)
@@ -607,7 +608,7 @@ func TestV1GetLocationsByCategoryWithCategoryNotFound(t *testing.T) {
 	catID, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("FindLocationsByCategory", mockContextMatcher, catID).
+		On("FindLocationsByCategory", utils.MockContextMatcher, catID).
 		Return(nil, usecases.ErrCategoryNotFound)
 
 	server.handleLocationsGet(ctx)
@@ -627,7 +628,7 @@ func TestV1GetLocationsWithSuccess(t *testing.T) {
 	ctx, _, server := newHandlerTestContext(t, "GET", "/api/v1/locations", nil, nil)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("GetLocations", mockContextMatcher).
+		On("GetLocations", utils.MockContextMatcher).
 		Return(&models.Locations{}, nil)
 
 	server.handleLocationsGet(ctx)
@@ -649,7 +650,7 @@ func TestV1GetLocationsByCategoryWithSuccess(t *testing.T) {
 	loc := models.NewLocation(models.NewID(), "Test Location", "1 rue de la Poste, 75001 Paris", catID, user.ID)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("FindLocationsByCategory", mockContextMatcher, catID).
+		On("FindLocationsByCategory", utils.MockContextMatcher, catID).
 		Return(&models.Locations{loc}, nil)
 
 	server.handleLocationsGet(ctx)
@@ -680,7 +681,7 @@ func TestV1GetLocationsByIDWithError(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("FindLocationByID", mockContextMatcher, id).
+		On("FindLocationByID", utils.MockContextMatcher, id).
 		Return(nil, errors.New("failed"))
 
 	server.handleLocationsGetByID(ctx)
@@ -705,7 +706,7 @@ func TestV1GetLocationsByIDWithLocationNotFound(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("FindLocationByID", mockContextMatcher, id).
+		On("FindLocationByID", utils.MockContextMatcher, id).
 		Return(nil, usecases.ErrLocationNotFound)
 
 	server.handleLocationsGetByID(ctx)
@@ -765,7 +766,7 @@ func TestV1GetLocationsByIDWithSuccess(t *testing.T) {
 	loc := models.NewLocation(id, "Test Location", "1 rue de la Poste, 75001 Paris", models.NewID(), user.ID)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("FindLocationByID", mockContextMatcher, id).
+		On("FindLocationByID", utils.MockContextMatcher, id).
 		Return(loc, nil)
 
 	server.handleLocationsGetByID(ctx)
@@ -803,7 +804,7 @@ func TestV1UpdateLocationWithError(t *testing.T) {
 	loc := models.NewLocation(id, "Test Location", "1 rue de la Poste, 75001 Paris", catID, user.ID)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("UpdateLocation", mockContextMatcher, loc).
+		On("UpdateLocation", utils.MockContextMatcher, loc).
 		Return(errors.New("failed"))
 
 	server.handleLocationsUpdate(ctx)
@@ -835,7 +836,7 @@ func TestV1UpdateLocationWithCategoryNotFound(t *testing.T) {
 	loc := models.NewLocation(id, "Test Location", "1 rue de la Poste, 75001 Paris", catID, user.ID)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("UpdateLocation", mockContextMatcher, loc).
+		On("UpdateLocation", utils.MockContextMatcher, loc).
 		Return(usecases.ErrCategoryNotFound)
 
 	server.handleLocationsUpdate(ctx)
@@ -867,7 +868,7 @@ func TestV1UpdateLocationWithLocationNotFound(t *testing.T) {
 	loc := models.NewLocation(id, "Test Location", "1 rue de la Poste, 75001 Paris", catID, user.ID)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("UpdateLocation", mockContextMatcher, loc).
+		On("UpdateLocation", utils.MockContextMatcher, loc).
 		Return(usecases.ErrLocationNotFound)
 
 	server.handleLocationsUpdate(ctx)
@@ -982,7 +983,7 @@ func TestV1UpdateLocationWithSuccess(t *testing.T) {
 	loc := models.NewLocation(id, "Test Location", "1 rue de la Poste, 75001 Paris", catID, user.ID)
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("UpdateLocation", mockContextMatcher, loc).
+		On("UpdateLocation", utils.MockContextMatcher, loc).
 		Return(nil)
 
 	server.handleLocationsUpdate(ctx)
@@ -1013,7 +1014,7 @@ func TestV1DeleteLocationWithError(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("DeleteLocation", mockContextMatcher, id).
+		On("DeleteLocation", utils.MockContextMatcher, id).
 		Return(errors.New(("failed")))
 
 	server.handleLocationsDelete(ctx)
@@ -1038,7 +1039,7 @@ func TestV1DeleteLocationWithLocationNotFound(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("DeleteLocation", mockContextMatcher, id).
+		On("DeleteLocation", utils.MockContextMatcher, id).
 		Return(usecases.ErrLocationNotFound)
 
 	server.handleLocationsDelete(ctx)
@@ -1096,7 +1097,7 @@ func TestV1DeleteLocationWithSuccess(t *testing.T) {
 	id, _ := models.ParseID("4b7a536e-7109-4a39-9549-f06f74f2093e")
 
 	server.api.LocationUsecase.(*mocks.LocationUsecaseMock).
-		On("DeleteLocation", mockContextMatcher, id).
+		On("DeleteLocation", utils.MockContextMatcher, id).
 		Return(nil)
 
 	server.handleLocationsDelete(ctx)

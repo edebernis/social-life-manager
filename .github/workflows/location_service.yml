@@ -12,24 +12,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.15
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Download dependencies
-        run: go mod vendor
       - name: Test
         run: make test
       - name: Build app and container
         run: make container
-      - name: Commit docs changes
+      - name: Commit HTTP docs changes
         uses: EndBug/add-and-commit@v7
         with:
           cwd: './services/location'
-          add: 'api'
+          add: 'api/http'
           message: 'location: update HTTP API docs'
+          author_name: Emeric de Bernis
+          author_email: emeric.debernis@gmail.com
+      - name: Commit protobuf changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          cwd: './services/location'
+          add: 'api/grpc'
+          message: 'location: update protobuf files'
           author_name: Emeric de Bernis
           author_email: emeric.debernis@gmail.com
 
@@ -38,14 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     if: (github.ref == 'refs/heads/master') || startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.15
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Download dependencies
-        run: go mod vendor
       - name: Login to Github Registry
         shell: bash
         env:

@@ -4,6 +4,8 @@ package location.v1;
 
 option go_package = "api/grpc/v1";
 
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
 service LocationService {
     // Creates a new category.
     rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {}
@@ -44,13 +46,11 @@ message Location {
     string address = 3;
     // Location category foreign key.
     string category_id = 4;
-    // User ID. Owner of the location.
-    string user_id = 5;
 }
 
 message CreateCategoryRequest {
-    // Category to be created.
-    Category category = 1;
+    // Name of the new category.
+    string name = 1 [(validator.field) = {string_not_empty: true}];
 }
 
 message CreateCategoryResponse {
@@ -67,7 +67,7 @@ message GetCategoriesResponse {
 
 message GetCategoryRequest {
     // Category ID to retrieve.
-    string id = 1;
+    string id = 1 [(validator.field) = {uuid_ver: 4, string_not_empty: true}];
 }
 
 message GetCategoryResponse {
@@ -76,8 +76,8 @@ message GetCategoryResponse {
 }
 
 message UpdateCategoryRequest {
-    // Category to be updated.
-    Category category = 1;
+    // New name to update the category with
+    string name = 1 [(validator.field) = {string_not_empty: true}];
 }
 
 message UpdateCategoryResponse {
@@ -86,15 +86,19 @@ message UpdateCategoryResponse {
 }
 
 message DeleteCategoryRequest {
-    // Category to be deleted.
-    string id = 1;
+    // ID of the category to delete.
+    string id = 1 [(validator.field) = {uuid_ver: 4, string_not_empty: true}];
 }
 
 message DeleteCategoryResponse {}
 
 message CreateLocationRequest {
-    // Location to be created.
-    Location location = 1;
+    // Name of the new location.
+    string name = 1 [(validator.field) = {string_not_empty: true}];
+    // Address of the new location.
+    string address = 2 [(validator.field) = {string_not_empty: true}];
+    // Category ID of the new location.
+    string category_id = 3 [(validator.field) = {uuid_ver: 4, string_not_empty: true}];
 }
 
 message CreateLocationResponse {
@@ -111,7 +115,7 @@ message GetLocationsResponse {
 
 message GetLocationRequest {
     // Location ID to retrieve.
-    string id = 1;
+    string id = 1 [(validator.field) = {uuid_ver: 4, string_not_empty: true}];
 }
 
 message GetLocationResponse {
@@ -120,8 +124,12 @@ message GetLocationResponse {
 }
 
 message UpdateLocationRequest {
-    // Location to be updated.
-    Location location = 1;
+    // New name to update the location with
+    string name = 1;
+    // New address to update the location with
+    string address = 2;
+    // New category to update the location with
+    string category_id = 3 [(validator.field) = {uuid_ver: 4}];
 }
 
 message UpdateLocationResponse {
@@ -130,8 +138,8 @@ message UpdateLocationResponse {
 }
 
 message DeleteLocationRequest {
-    // Location to be deleted.
-    string id = 1;
+    // Location ID to delete.
+    string id = 1 [(validator.field) = {uuid_ver: 4, string_not_empty: true}];
 }
 
 message DeleteLocationResponse {}

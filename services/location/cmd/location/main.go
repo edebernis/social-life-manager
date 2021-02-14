@@ -67,13 +67,19 @@ func setupHTTPAPI(api *api.API, registry *prometheus.Registry) *httpapi.HTTPServ
 		ReadHeaderTimeout: config.Config.API.HTTP.ReadHeaderTimeout,
 		ReadTimeout:       config.Config.API.HTTP.ReadTimeout,
 		WriteTimeout:      config.Config.API.HTTP.WriteTimeout,
-		JWTAlgorithm:      config.Config.JWT.Algorithm,
-		JWTSecretKey:      config.Config.JWT.Secret,
+		JWTAlgorithm:      config.Config.API.JWT.Algorithm,
+		JWTSecretKey:      config.Config.API.JWT.Secret,
 	})
 }
 
 func setupGRPCAPI(api *api.API, registry *prometheus.Registry) *grpcapi.GRPCServer {
-	return grpcapi.NewGRPCServer(api, registry, &grpcapi.Config{
+	auth := grpcapi.NewJWTAuthenticator(
+		config.Config.API.GRPC.AuthScheme,
+		config.Config.API.JWT.Algorithm,
+		config.Config.API.JWT.Secret,
+	)
+
+	return grpcapi.NewGRPCServer(api, auth, registry, &grpcapi.Config{
 		ConnectionTimeout: config.Config.API.GRPC.ConnectionTimeout,
 	})
 }
