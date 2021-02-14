@@ -6,7 +6,7 @@ FROM golang:1.15-alpine
 RUN apk add --no-cache gcc g++ git protobuf-dev=3.13.0-r2 
 
 # Enable Go Modules
-ENV GO111MODULE on
+ENV GO111MODULE=on GOCACHE=/tmp
 
 # Install Go tools
 # - Protobuf Go plugins

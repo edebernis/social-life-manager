@@ -7,48 +7,17 @@ set -o pipefail
 export CGO_ENABLED=1
 export GOFLAGS="-mod=vendor"
 
+echo "Download dependencies:"
+go mod vendor
+
 # Collect test targets
 SRC_DIRS="cmd pkg internal"
-TARGETS=$(for d in ${SRC_DIRS}; do echo ./$d/...; done)
+TARGETS=$(for d in ${SRC_DIRS}; do echo -n "./$d/... "; done)
+
+# Lint everything
+echo "Running linters:"
+golangci-lint run -E gofmt --timeout 10m ${TARGETS} 2>&1
 
 # Run tests
 echo "Running unit tests:"
 go test -installsuffix "static" -cover -race ${TARGETS} 2>&1
-echo
-
-# Collect all `.go` files and `gofmt` against them. If some need formatting - print them.
-echo "Checking go fmt:"
-ERRS=$(find ${SRC_DIRS} -type f -name \*.go | xargs gofmt -l 2>&1 || true)
-if [ -n "${ERRS}" ]; then
-    echo "FAIL - the following files need to be gofmt'ed:"
-    for e in ${ERRS}; do
-        echo "    $e"
-    done
-    echo
-    exit 1
-fi
-echo "PASS"
-echo
-
-# Run `go vet`. If problems are found - print them.
-echo "Checking go vet:"
-ERRS=$(go vet ${TARGETS} 2>&1 || true)
-if [ -n "${ERRS}" ]; then
-    echo "FAIL"
-    echo "${ERRS}"
-    echo
-    exit 1
-fi
-echo "PASS"
-echo
-
-# Run golangci-lint. If problems are found - print them.
-echo "Checking golangci-lint:"
-ERRS=$(golangci-lint run --timeout 5m ${TARGETS} 2>&1 || true)
-if [ -n "${ERRS}" ]; then
-    echo "FAIL"
-    echo "${ERRS}"
-    echo
-    exit 1
-fi
-echo "PASS"

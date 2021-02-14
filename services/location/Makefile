@@ -13,11 +13,24 @@ IMAGE := $(REGISTRY)/$(BIN)
 TAG := $(VERSION)__$(OS)_$(ARCH)
 BUILD_IMAGE := build/$(BIN)
 
+all-build: $(addprefix build-, $(subst /,_, $(ALL_PLATFORMS)))
+
 build-%:
 	@$(MAKE) build                        \
 	    --no-print-directory              \
 	    GOOS=$(firstword $(subst _, ,$*)) \
 	    GOARCH=$(lastword $(subst _, ,$*))
+
+build: $(OUTBIN)
+$(OUTBIN):
+	@$(MAKE) run-build-script           \
+	    --no-print-directory            \
+	    SCRIPT=scripts/build.sh
+
+test:
+	@$(MAKE) run-build-script          \
+	    --no-print-directory           \
+	    SCRIPT=scripts/test.sh
 
 container:
 	@$(MAKE) .container                   \
@@ -31,45 +44,18 @@ push:
 	    GOOS=linux                        \
 	    GOARCH=amd64
 
-all-build: $(addprefix build-, $(subst /,_, $(ALL_PLATFORMS)))
-
-build: $(OUTBIN)
-$(OUTBIN):
-	@$(MAKE) run-build-script           \
-	    --no-print-directory            \
-	    SCRIPT=scripts/build.sh
-
-test:
-	@$(MAKE) run-build-script          \
-	    --no-print-directory           \
-	    SCRIPT=scripts/test.sh
-
 build-image:
 	@docker build --rm -t $(BUILD_IMAGE) - < build/package/build.Dockerfile
 
-download-dependencies:
+run-build-script: build-image
+	@mkdir -p $(BUILD_DIR)
 	@docker run                                                 \
 	    -i                                                      \
 	    --rm                                                    \
-	    -v $$(pwd):/src                                         \
-	    -w /src                                                 \
-		-v $$(pwd)/.cache:/.cache                               \
-	    --env HTTP_PROXY=$(HTTP_PROXY)                          \
-	    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
-	    $(BUILD_IMAGE)                                          \
-	    /bin/sh -c "go mod vendor"                              \
-
-run-build-script: build-image download-dependencies
-	@mkdir -p $(BUILD_DIR) .cache
-	@docker run                                                 \
-	    -i                                                      \
-	    --rm                                                    \
-	    -u $$(id -u):$$(id -g)                                  \
 	    -v $$(pwd):/src                                         \
 	    -w /src                                                 \
 		-v $$(pwd)/$(BUILD_DIR):/go/bin                         \
 	    -v $$(pwd)/$(BUILD_DIR):/go/bin/$(OS)_$(ARCH)           \
-		-v $$(pwd)/.cache:/.cache                               \
 	    --env HTTP_PROXY=$(HTTP_PROXY)                          \
 	    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
 	    $(BUILD_IMAGE)                                          \
@@ -87,13 +73,8 @@ run-build-script: build-image download-dependencies
 	@docker push $(IMAGE):$(TAG)
 	@docker push $(IMAGE):latest
 
-clean-bin:
+clean:
 	@rm -rf bin
-
-clean-cache:
-	@rm -rf .cache
-
-clean: clean-bin clean-cache
 
 version:
 	@echo $(VERSION)
