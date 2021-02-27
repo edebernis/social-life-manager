@@ -60,7 +60,7 @@ type testJWTCredentials struct {
 
 func (t *testJWTCredentials) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
 	claims := &api.JWTClaims{
-		StdClaims: jwt.StandardClaims{
+		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Add(time.Hour * -1).Unix(),
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 			IssuedAt:  time.Now().Unix(),

@@ -63,12 +63,15 @@ func setupSQLRepository(registry *prometheus.Registry) (*sqlrepo.SQLRepository, 
 }
 
 func setupHTTPAPI(api *api.API, registry *prometheus.Registry) *httpapi.HTTPServer {
-	return httpapi.NewHTTPServer(api, registry, &httpapi.Config{
+	auth := httpapi.NewJWTAuthenticator(
+		config.Config.API.JWT.Algorithm,
+		config.Config.API.JWT.Secret,
+	)
+
+	return httpapi.NewHTTPServer(api, auth, registry, &httpapi.Config{
 		ReadHeaderTimeout: config.Config.API.HTTP.ReadHeaderTimeout,
 		ReadTimeout:       config.Config.API.HTTP.ReadTimeout,
 		WriteTimeout:      config.Config.API.HTTP.WriteTimeout,
-		JWTAlgorithm:      config.Config.API.JWT.Algorithm,
-		JWTSecretKey:      config.Config.API.JWT.Secret,
 	})
 }
 

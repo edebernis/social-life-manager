@@ -40,7 +40,7 @@ type GRPCServer struct {
 }
 
 // NewGRPCServer builds and register a new gRPC server
-func NewGRPCServer(api *api.API, auth Authenticator, registry prometheus.Registerer, config *Config) *GRPCServer {
+func NewGRPCServer(api *api.API, auth api.Authenticator, registry prometheus.Registerer, config *Config) *GRPCServer {
 	metricsMW := newMetricsMiddleware(registry)
 
 	s := &GRPCServer{

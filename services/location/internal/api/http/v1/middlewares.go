@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -8,8 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/edebernis/social-life-manager/services/location/internal/models"
+	"github.com/edebernis/social-life-manager/services/location/internal/api"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
@@ -65,80 +65,60 @@ func recoveryMiddleware() gin.HandlerFunc {
 	)
 }
 
-// authenticationMiddleware handles request authentication
-// and add user data into request context
-type authenticationMiddleware struct {
-	jwtAlgorithm string
-	jwtSecretKey string
-}
-
-type userClaims struct {
-	Email string `json:"email,omitempty"`
-	jwt.StandardClaims
-}
-
-func newAuthMiddleware(jwtAlgorithm, jwtSecretKey string) *authenticationMiddleware {
-	return &authenticationMiddleware{
-		jwtAlgorithm,
-		jwtSecretKey,
-	}
-}
-
-func (mw *authenticationMiddleware) handlerFunc() gin.HandlerFunc {
+func authMiddleware(auth api.Authenticator) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token, err := mw.parseJWTToken(c, &userClaims{})
+		creds, err := auth.CredentialsFromContext(c)
 		if err != nil {
-			logger.Errorf("authenticationMiddleware: invalid JWT token. %v", err)
-			_ = c.AbortWithError(http.StatusUnauthorized, errors.New("Invalid authentication token"))
+			logger.Errorf("authMiddleware: unable to retrieve creds from context. %v", err)
+			abort(c, http.StatusUnauthorized, "invalid auth")
 			return
 		}
 
-		claims := token.Claims.(*userClaims)
-
-		if err := mw.setContextDataFromClaims(c, claims); err != nil {
-			logger.Errorf("authenticationMiddleware: failed to set context data from JWT token. %v", err)
-			_ = c.AbortWithError(http.StatusUnauthorized, errors.New("Invalid authentication token"))
+		newCtx, err := auth.Authenticate(c, creds)
+		if err != nil {
+			logger.Errorf("authMiddleware: unable to authenticate user using provided credentials. %v", err)
+			abort(c, http.StatusUnauthorized, "invalid auth")
 			return
 		}
 
+		c.Request = c.Request.WithContext(newCtx)
 		c.Next()
 	}
 }
 
-func (mw *authenticationMiddleware) setContextDataFromClaims(c *gin.Context, claims *userClaims) error {
-	userID, err := models.ParseID(claims.StandardClaims.Subject)
-	if err != nil {
-		return fmt.Errorf("Invalid user ID in JWT token subject : %s. %w", claims.StandardClaims.Subject, err)
-	}
-	if userID == models.NilID {
-		return errors.New("User ID cannot be nil")
-	}
-
-	user := models.NewUser(userID, claims.Email)
-	c.Request = c.Request.WithContext(models.NewContextWithUser(c.Request.Context(), user))
-
-	return nil
+// JWTAuthenticator is a middleware authenticating user using JWT tokens
+type JWTAuthenticator struct {
+	*api.JWTAuthenticator
 }
 
-func (mw *authenticationMiddleware) parseJWTToken(c *gin.Context, claims *userClaims) (*jwt.Token, error) {
+// NewJWTAuthenticator creates a new JWTAuthenticator
+func NewJWTAuthenticator(algorithm, secretKey string) *JWTAuthenticator {
+	return &JWTAuthenticator{
+		&api.JWTAuthenticator{
+			Algorithm: algorithm,
+			SecretKey: secretKey,
+		},
+	}
+}
+
+// CredentialsFromContext extracts JWT token from request headers
+func (a *JWTAuthenticator) CredentialsFromContext(ctx context.Context) (interface{}, error) {
+	c, ok := ctx.(*gin.Context)
+	if !ok {
+		return nil, errors.New("invalid context")
+	}
+
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
-		return nil, errors.New("Empty Authorization header")
+		return nil, errors.New("empty Authorization header")
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if !(len(parts) == 2 && parts[0] == "Bearer") {
-		return nil, fmt.Errorf("Invalid Authorization header : %s", authHeader)
+		return nil, fmt.Errorf("invalid Authorization header : %s", authHeader)
 	}
 
-	encodedToken := parts[1]
-
-	return jwt.ParseWithClaims(encodedToken, claims, func(token *jwt.Token) (interface{}, error) {
-		if jwt.GetSigningMethod(mw.jwtAlgorithm) != token.Method {
-			return nil, fmt.Errorf("Invalid signing algorithm for JWT token : %s", token.Header["alg"])
-		}
-		return []byte(mw.jwtSecretKey), nil
-	})
+	return parts[1], nil
 }
 
 // metricsMiddleware collects metrics about HTTP requests

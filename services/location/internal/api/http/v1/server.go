@@ -53,14 +53,14 @@ func (s *HTTPServer) Shutdown() error {
 	defer cancel()
 
 	if err := s.server.Shutdown(ctx); err != nil {
-		return fmt.Errorf("Server forced to shutdown: %w", err)
+		return fmt.Errorf("server forced to shutdown: %w", err)
 	}
 
 	return nil
 }
 
 // NewHTTPServer creates a new HTTP server for the API
-func NewHTTPServer(api *api.API, registry prometheus.Registerer, config *Config) *HTTPServer {
+func NewHTTPServer(api *api.API, auth api.Authenticator, registry prometheus.Registerer, config *Config) *HTTPServer {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 
@@ -77,7 +77,7 @@ func NewHTTPServer(api *api.API, registry prometheus.Registerer, config *Config)
 			WriteTimeout:      config.WriteTimeout,
 		},
 	}
-	s.routes()
+	s.routes(auth)
 
 	return s
 }
@@ -88,11 +88,6 @@ type Config struct {
 	ReadHeaderTimeout time.Duration
 	ReadTimeout       time.Duration
 	WriteTimeout      time.Duration
-
-	// Signing algorithm used for JWT
-	JWTAlgorithm string
-	// Key to check JWT signature
-	JWTSecretKey string
 }
 
 // Abort current request and return consistent error to the user

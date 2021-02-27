@@ -56,9 +56,7 @@ func TestPingHTTPServer(t *testing.T) {
 	resp := httptest.NewRecorder()
 
 	api := api.NewAPI(new(mocks.LocationUsecaseMock))
-	server := NewHTTPServer(api, prometheus.NewRegistry(), &Config{
-		JWTSecretKey: "",
-	})
+	server := NewHTTPServer(api, nil, prometheus.NewRegistry(), &Config{})
 
 	req, _ := http.NewRequest("GET", "/ping", nil)
 
@@ -72,9 +70,7 @@ func TestHTTPServerUnknownRoute(t *testing.T) {
 	resp := httptest.NewRecorder()
 
 	api := api.NewAPI(new(mocks.LocationUsecaseMock))
-	server := NewHTTPServer(api, prometheus.NewRegistry(), &Config{
-		JWTSecretKey: "",
-	})
+	server := NewHTTPServer(api, nil, prometheus.NewRegistry(), &Config{})
 
 	req, _ := http.NewRequest("GET", "/pong", nil)
 

@@ -3,10 +3,11 @@ package httpapi
 import (
 	"net/http"
 
+	"github.com/edebernis/social-life-manager/services/location/internal/api"
 	"github.com/gin-gonic/gin"
 )
 
-func (s *HTTPServer) routes() {
+func (s *HTTPServer) routes(auth api.Authenticator) {
 	// Default middlewares used on every routes
 	s.router.Use(loggerMiddleware())
 	s.router.Use(errorMiddleware())
@@ -16,12 +17,8 @@ func (s *HTTPServer) routes() {
 	// Healthchecks routes
 	s.router.GET("/ping", s.handlePing)
 
-	// Applies authentication middleware on every API routes, for every API versions.
-	// We may, in the future, use a different auth middleware for different API versions.
-	authMW := newAuthMiddleware(s.Config.JWTAlgorithm, s.Config.JWTSecretKey)
-
 	// Main APÌ routes group, versioned.
-	api := s.router.Group(s.BaseURL, authMW.handlerFunc())
+	api := s.router.Group(s.BaseURL, authMiddleware(auth))
 	{
 		v1 := api.Group("/v1")
 		{

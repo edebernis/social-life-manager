@@ -21,7 +21,7 @@ func newRecoveryHandlerFunc() grpc_recovery.RecoveryHandlerFuncContext {
 	}
 }
 
-func newAuthHandlerFunc(auth Authenticator) grpc_auth.AuthFunc {
+func newAuthHandlerFunc(auth api.Authenticator) grpc_auth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		creds, err := auth.CredentialsFromContext(ctx)
 		if err != nil {
@@ -62,12 +62,6 @@ func (m *metricsMiddleware) unaryServerInterceptor() grpc.UnaryServerInterceptor
 
 func (m *metricsMiddleware) initializeMetrics(s *grpc.Server) {
 	m.metrics.InitializeMetrics(s)
-}
-
-// Authenticator describes authentication mechanism for GRPC API
-type Authenticator interface {
-	CredentialsFromContext(context.Context) (interface{}, error)
-	Authenticate(ctx context.Context, credentials interface{}) (context.Context, error)
 }
 
 // JWTAuthenticator is a middleware authenticating user using JWT tokens

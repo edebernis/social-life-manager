@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/edebernis/social-life-manager/services/location/internal/api"
 	"github.com/edebernis/social-life-manager/services/location/internal/models"
 	"github.com/edebernis/social-life-manager/services/location/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -38,7 +39,7 @@ func TestLoggerMiddlewareWithOKRequest(t *testing.T) {
 		c.JSON(http.StatusOK, nil)
 	})
 
-	req, err := http.NewRequest("GET", "/testAuthMiddleware", nil)
+	req, err := http.NewRequest("GET", "/testLoggerMiddleware", nil)
 	if err != nil {
 		t.FailNow()
 	}
@@ -165,13 +166,10 @@ func TestRecoveryMiddlewareWithPanicRequest(t *testing.T) {
 	})
 }
 
-func newTestAuthMiddleware() *HTTPServer {
+func newTestAuthMiddleware() (*HTTPServer, *JWTAuthenticator) {
 	gin.SetMode(gin.TestMode)
 	server := &HTTPServer{
-		&Config{
-			JWTAlgorithm: jwt.SigningMethodHS256.Name,
-			JWTSecretKey: "secret",
-		},
+		&Config{},
 		"/api",
 		nil,
 		nil,
@@ -179,16 +177,20 @@ func newTestAuthMiddleware() *HTTPServer {
 		nil,
 	}
 
-	mw := newAuthMiddleware(server.Config.JWTAlgorithm, server.Config.JWTSecretKey)
-	server.router.Use(mw.handlerFunc())
+	auth := NewJWTAuthenticator(
+		jwt.SigningMethodHS256.Name,
+		"secret",
+	)
 
-	return server
+	server.router.Use(authMiddleware(auth))
+
+	return server, auth
 }
 
 func TestAuthMiddlewareWithoutToken(t *testing.T) {
 	resp := httptest.NewRecorder()
 
-	server := newTestAuthMiddleware()
+	server, _ := newTestAuthMiddleware()
 
 	server.router.GET("/testAuthMiddleware", func(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
@@ -207,7 +209,7 @@ func TestAuthMiddlewareWithoutToken(t *testing.T) {
 func TestAuthMiddlewareWithInvalidHeader(t *testing.T) {
 	resp := httptest.NewRecorder()
 
-	server := newTestAuthMiddleware()
+	server, _ := newTestAuthMiddleware()
 
 	server.router.GET("/testAuthMiddleware", func(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
@@ -228,7 +230,7 @@ func TestAuthMiddlewareWithInvalidHeader(t *testing.T) {
 func TestAuthMiddlewareWithInvalidSignatureToken(t *testing.T) {
 	resp := httptest.NewRecorder()
 
-	server := newTestAuthMiddleware()
+	server, auth := newTestAuthMiddleware()
 
 	server.router.GET("/testAuthMiddleware", func(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
@@ -239,7 +241,7 @@ func TestAuthMiddlewareWithInvalidSignatureToken(t *testing.T) {
 		t.FailNow()
 	}
 
-	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, jwt.SigningMethodHS512.Name, nil)
+	token, err := utils.NewJWTToken(auth.SecretKey, jwt.SigningMethodHS512.Name, nil)
 	if err != nil {
 		t.FailNow()
 	}
@@ -254,7 +256,7 @@ func TestAuthMiddlewareWithInvalidSignatureToken(t *testing.T) {
 func TestAuthMiddlewareWithoutUserIDInToken(t *testing.T) {
 	resp := httptest.NewRecorder()
 
-	server := newTestAuthMiddleware()
+	server, auth := newTestAuthMiddleware()
 
 	server.router.GET("/testAuthMiddleware", func(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
@@ -265,7 +267,7 @@ func TestAuthMiddlewareWithoutUserIDInToken(t *testing.T) {
 		t.FailNow()
 	}
 
-	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, nil)
+	token, err := utils.NewJWTToken(auth.SecretKey, auth.Algorithm, nil)
 	if err != nil {
 		t.FailNow()
 	}
@@ -280,7 +282,7 @@ func TestAuthMiddlewareWithoutUserIDInToken(t *testing.T) {
 func TestAuthMiddlewareWithExpiredToken(t *testing.T) {
 	resp := httptest.NewRecorder()
 
-	server := newTestAuthMiddleware()
+	server, auth := newTestAuthMiddleware()
 
 	server.router.GET("/testAuthMiddleware", func(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
@@ -291,18 +293,18 @@ func TestAuthMiddlewareWithExpiredToken(t *testing.T) {
 		t.FailNow()
 	}
 
-	claims := &userClaims{
-		"test@no-reply.com",
-		jwt.StandardClaims{
+	claims := &api.JWTClaims{
+		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Add(time.Hour * -2).Unix(),
 			ExpiresAt: time.Now().Add(time.Hour * -1).Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    "test",
 			Subject:   models.NewID().String(),
 		},
+		Email: "test@no-reply.com",
 	}
 
-	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
+	token, err := utils.NewJWTToken(auth.SecretKey, auth.Algorithm, claims)
 	if err != nil {
 		t.FailNow()
 	}
@@ -317,7 +319,7 @@ func TestAuthMiddlewareWithExpiredToken(t *testing.T) {
 func TestAuthMiddlewareWithoutTokenSubject(t *testing.T) {
 	resp := httptest.NewRecorder()
 
-	server := newTestAuthMiddleware()
+	server, auth := newTestAuthMiddleware()
 
 	server.router.GET("/testAuthMiddleware", func(c *gin.Context) {
 		c.JSON(http.StatusOK, nil)
@@ -328,17 +330,17 @@ func TestAuthMiddlewareWithoutTokenSubject(t *testing.T) {
 		t.FailNow()
 	}
 
-	claims := &userClaims{
-		"test@no-reply.com",
-		jwt.StandardClaims{
+	claims := &api.JWTClaims{
+		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Add(time.Hour * -1).Unix(),
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    "test",
 		},
+		Email: "test@no-reply.com",
 	}
 
-	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
+	token, err := utils.NewJWTToken(auth.SecretKey, auth.Algorithm, claims)
 	if err != nil {
 		t.FailNow()
 	}
@@ -353,7 +355,7 @@ func TestAuthMiddlewareWithoutTokenSubject(t *testing.T) {
 func TestAuthMiddlewareWithValidToken(t *testing.T) {
 	resp := httptest.NewRecorder()
 
-	server := newTestAuthMiddleware()
+	server, auth := newTestAuthMiddleware()
 
 	userID := models.NewID()
 	userEmail := "test@no-reply.com"
@@ -373,18 +375,18 @@ func TestAuthMiddlewareWithValidToken(t *testing.T) {
 		t.FailNow()
 	}
 
-	claims := &userClaims{
-		userEmail,
-		jwt.StandardClaims{
+	claims := &api.JWTClaims{
+		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Add(time.Hour * -1).Unix(),
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    "test",
 			Subject:   userID.String(),
 		},
+		Email: userEmail,
 	}
 
-	token, err := utils.NewJWTToken(server.Config.JWTSecretKey, server.Config.JWTAlgorithm, claims)
+	token, err := utils.NewJWTToken(auth.SecretKey, auth.Algorithm, claims)
 	if err != nil {
 		t.FailNow()
 	}
